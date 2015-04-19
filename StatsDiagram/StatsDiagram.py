@@ -298,31 +298,35 @@ class TaylorStatistics(StatsDiagram,TaylorDiagram):
 
 #Examples:
 
+#from StatsDiagram import *
+#from numpy.random import randn
+#from matplotlib.pyplot import show,subplot
+
 #a=randn(10)
 #b=randn(10)
 #ref=randn(10)
 #subplot(221)
-#TD=TargetDiagram(a,ref)
+#TD=TargetStatistics(a,ref)
 #TD(b,ref)
 #subplot(222)
-#TD=TaylorDiagram(a,ref)
+#TD=TaylorStatistics(a,ref)
 #TD(b,ref)
 
-#R1,p=pearsonr(a,ref)
-#E1=a.mean()-ref.mean()
 #std1=a.std()
-#refstd1=ref.std()
-#R2,p=pearsonr(b,ref)
-#E2=b.mean()-ref.mean()
 #std2=b.std()
-#refstd2=ref.std()
+#refstd=ref.std()
+#R1,p=pearsonr(a,ref)
+#E1=(a.mean()-ref.mean())/refstd
+#G1=std1/refstd
+#R2,p=pearsonr(b,ref)
+#E2=(b.mean()-ref.mean())/refstd
+#G2=std2/refstd
 
 #subplot(223)
-#TD=TargetPlot(R1,E1,std1,refstd1)
-#TD(R2,E2,std2,refstd2)
+#TayD=TargetDiagram(G1,E1,R1,)
+#TayD(G2,E2,R2,)
 #subplot(224)
-#TD=TaylorPlot(R1,E1,std1,refstd1)
-#TD(R2,E2,std2,refstd2)
+#TarD=TaylorDiagram(G1,E1,R1,)
+#TarD(G2,E2,R2,)
 
-
-
+#show()
