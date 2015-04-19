@@ -16,4 +16,4 @@
 #    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from StatsDiagram import *
+from .StatsDiagram import *
