@@ -51,15 +51,15 @@ class StatsDiagram:
         self.gamma=dat.std()/self.std
         self.R,self.p=pearsonr(dat,ref)
         self.E=rmsds(self.gamma,self.R)
-	print(self)
+        print(self)
     def __str__(self):
         return "\tNormalised Bias: "+str(self.E0)+\
-	    "\n\tNormalised Unbiased RMSD: "+str(self.E)+\
-	    "\n\tNormalised RMSD: "+str(sqrt(self.E0**2+self.E**2))+\
-	    "\n\tCorrelation Coefficient: "+str(self.R)+\
-	    "\n\t\t with p-value: "+str(self.p)+\
-	    "\n\tSTD Ratio (Data/Reference): "+str(self.gamma)+\
-	    "\n\tReference STD: "+str(self.std)+'\n'
+           "\n\tNormalised Unbiased RMSD: "+str(self.E)+\
+           "\n\tNormalised RMSD: "+str(sqrt(self.E0**2+self.E**2))+\
+           "\n\tCorrelation Coefficient: "+str(self.R)+\
+           "\n\t\t with p-value: "+str(self.p)+\
+           "\n\tSTD Ratio (Data/Reference): "+str(self.gamma)+\
+           "\n\tReference STD: "+str(self.std)+'\n'
 
 
 class Stats:
@@ -70,20 +70,20 @@ class Stats:
         self.R=rho
         self.gamma=gam
         self.E=rmsds(gam,rho)
-	print(self)
+        print(self)
     def __call__(self,gam,E0,rho):
         """Reloading the necessary metrics."""
         self.E0=E0
         self.R=rho
         self.gamma=gam
         self.E=rmsds(gam,rho)
-	print(self)
+        print(self)
     def __str__(self):
         return "\tNormalised Bias: "+str(self.E0)+\
-	    "\n\tNormalised Unbiased RMSD: "+str(self.E)+\
-	    "\n\tNormalised RMSD: "+str(sqrt(self.E0**2+self.E**2))+\
-	    "\n\tCorrelation Coefficient: "+str(self.R)+\
-	    "\n\tSTD Ratio (Data/Reference): "+str(self.gamma)
+          "\n\tNormalised Unbiased RMSD: "+str(self.E)+\
+          "\n\tNormalised RMSD: "+str(sqrt(self.E0**2+self.E**2))+\
+          "\n\tCorrelation Coefficient: "+str(self.R)+\
+          "\n\tSTD Ratio (Data/Reference): "+str(self.gamma)
 
 class Target:
     """Base class providing a function to draw the grid for Target Diagrams.    """
@@ -114,14 +114,14 @@ class Taylor:
         n=R/.5
         for m in arange(3,n+1):
             plot(m*.5*sin(a),m*.5*cos(a),'k:')
-	#Draw rays for correlations at .99,.75,.5,.25 steps:
-	rays=list(arange(a0,1.05,.25))
-	rays.append(.99)
-	if a0==-1.: rays.append(-.99)
+        #Draw rays for correlations at .99,.75,.5,.25 steps:
+        rays=list(arange(a0,1.05,.25))
+        rays.append(.99)
+        if a0==-1.: rays.append(-.99)
         for rho in rays:
             plot((R*rho,0),(R*sin(arccos(rho)),0),'k:')
-	    d = rho>=0. and 1.02 or 1.25
-	    text(d*R*rho,1.01*R*sin(arccos(rho)),str(rho),fontsize=8)
+        d = rho>=0. and 1.02 or 1.25
+        text(d*R*rho,1.01*R*sin(arccos(rho)),str(rho),fontsize=8)
         text(1.01*R*sin(pi*.25),1.02*R*cos(pi*.25),r'$\rho$',rotation=-45,fontsize=16)
         #text(0.,1.02*R*cos(0.),'0')
         #text(1.03*R*sin(.5*pi),0.,'1')
@@ -164,11 +164,11 @@ class TaylorDiagram(Taylor,Stats):
                       be filled with colour code.
         """
         Stats.__init__(self,gam,E0,rho)
-	R=max(int(2.*self.gamma+1.)/2.,1.5)
+        R=max(int(2.*self.gamma+1.)/2.,1.5)
         self.drawTaylorGrid(R,dr,antiCorrelation)
         self._cmax=max(1.,abs(self.E0))
         self._cmin=-self._cmax
-	self._lpos=[]
+        self._lpos=[]
         if antiCorrelation:
             self._axis={'xmin':-1.3*R,'xmax':1.3*R,'ymin':-.1*R,'ymax':1.1*R}
         else:
@@ -190,17 +190,17 @@ class TaylorDiagram(Taylor,Stats):
     def add(self,gam,E0,R,marker='o',s=40,*opts,**keys):
         """Function to add additional points to the diagram, using invoked 
         by means of the ``__call__`` function."""
-	E=rmsds(gam,R)
+        E=rmsds(gam,R)
         scatter(gam*R,gam*sin(arccos(R)),c=E0,vmin=self._cmin,vmax=self._cmax,marker=marker,s=s,*opts,**keys)
         self._lpos.append((gam*R,gam*sin(arccos(R))))
         axis(**self._axis)
     def labels(self,lstr,*opts,**keys):
         """Adds labels ``lstr``` to the points in the diagram"""
-	yrange=axis()[2:]
-	rmax=abs(yrange[1]-yrange[0])
+        yrange=axis()[2:]
+        rmax=abs(yrange[1]-yrange[0])
         for n,p in enumerate(self._lpos):
-	    text(p[0]+.025*rmax,p[1]+.025*rmax,lstr[n],*opts,**keys)
- 
+           text(p[0]+.025*rmax,p[1]+.025*rmax,lstr[n],*opts,**keys)
+
 class TargetDiagram(Target,Stats):
     def __init__(self,gam,E0,rho,marker='o',s=40,antiCorrelation=False,*opts,**keys):
         """Initialises the class given the pre-calculated metrics and draws 
@@ -218,7 +218,7 @@ class TargetDiagram(Target,Stats):
         else:
           self._cmin=0.
         self._cmax=1.
-	self._lpos=[]
+        self._lpos=[]
         self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
         self.cbar=colorbar()
         self.cbar.set_label('Correlation Coefficient')
@@ -234,8 +234,8 @@ class TargetDiagram(Target,Stats):
     def add(self,gam,E0,R,marker='o',s=40,*opts,**keys):
         """Function to add additional points to the diagram, using invoked 
         by means of the ``__call__`` function."""
-	sig= gam>1 and 1 or -1
-	E=sqrt(1.+gam**2-2.*gam*R)
+        sig= gam>1 and 1 or -1
+        E=sqrt(1.+gam**2-2.*gam*R)
         scatter(sig*E,E0,c=R,vmin=self._cmin,vmax=self._cmax,marker=marker,s=s,*opts,**keys)
         self._lpos.append((sig*E,E0))
         rmax=abs(array(axis('scaled'))).max()
@@ -244,9 +244,9 @@ class TargetDiagram(Target,Stats):
         axis(xmin=-rmax,xmax=rmax,ymax=rmax,ymin=-rmax)
     def labels(self,lstr,*opts,**keys):
         """Adds labels ``lstr``` to the points in the diagram"""
-	rmax=abs(array(axis())).max()
+        rmax=abs(array(axis())).max()
         for n,p in enumerate(self._lpos):
-	    text(p[0]+.025*rmax,p[1]+.025*rmax,lstr[n],*opts,**keys)
+           text(p[0]+.025*rmax,p[1]+.025*rmax,lstr[n],*opts,**keys)
 
 class TargetStatistics(StatsDiagram,TargetDiagram):
     def __init__(self,data,refdata,marker='o',s=40,antiCorrelation=False,*opts,**keys):
@@ -265,7 +265,7 @@ class TargetStatistics(StatsDiagram,TargetDiagram):
         else:
           self._cmin=0.
         self._cmax=1.
-	self._lpos=[]
+        self._lpos=[]
         self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
         self.cbar=colorbar()
         self.cbar.set_label('Correlation Coefficient')
@@ -290,11 +290,11 @@ class TaylorStatistics(StatsDiagram,TaylorDiagram):
                       be filled with colour code.
         """
         StatsDiagram.__init__(self,data,refdata,*opts,**keys)
-	R=max(int(2.*self.gamma+1.)/2.,1.5)
+        R=max(int(2.*self.gamma+1.)/2.,1.5)
         self.drawTaylorGrid(R,dr,antiCorrelation)
         self._cmax=max(1.,abs(self.E0))
         self._cmin=-self._cmax
-	self._lpos=[]
+        self._lpos=[]
         if antiCorrelation:
             self._axis={'xmin':-1.3*R,'xmax':1.3*R,'ymin':-.1*R,'ymax':1.1*R}
         else:
