@@ -319,6 +319,8 @@ class TaylorStatistics(StatsDiagram,TaylorDiagram):
 #from StatsDiagram import *
 #from numpy.random import randn
 #from matplotlib.pyplot import show,subplot
+#from scipy.stats import pearsonr
+
 
 #a=randn(10)
 #b=randn(10)
