@@ -165,10 +165,10 @@ class TaylorDiagram(Taylor,Stats):
              :marker: shape used to show points, should be hollow shape to
                       be filled with colour code.
         """
-        self._cmax=max(abs(E0),self._cmax)
-        self._cmin=-self._cmin
-        Stats.__call__(self,gam,E0,rho)
-        self.add(gam,E0,rho,marker=marker,s=s,*opts,**keys)
+        Stats.__call__(self,gam,E0,rho,*opts,**keys)
+        self._cmax=max(abs(self.E0),self._cmax)
+        self._cmin=-self._cmax
+        self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
     def add(self,gam,E0,R,marker='o',s=40,*opts,**keys):
         """Function to add additional points to the diagram, using invoked 
         by means of the ``__call__`` function."""
