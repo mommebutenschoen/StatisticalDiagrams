@@ -4,8 +4,6 @@ StatisticalDiagrams
 
 Python package for drawing statistical summary diagrams such as Taylor or Target Diagrams.
 
-To use it, add the top-level of the repository to your PYTHONPATH or move or link the StatsDiagram folder to some location included in your PYTHONPATH.
-
 
 Installation:
 -------------
