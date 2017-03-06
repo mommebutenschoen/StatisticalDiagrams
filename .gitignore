@@ -1,4 +1,6 @@
 *.pyc
-*.swp
 *~
-*.bak
+*.swp
+__pycache__
+ncPyTools.egg-info/
+_build

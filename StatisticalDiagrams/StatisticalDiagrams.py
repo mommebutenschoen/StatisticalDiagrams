@@ -2,13 +2,13 @@
 #    Copyright 2015 Momme Butenschoen, Plymouth Marine Laboratory
 #    This file is part of the StatisticalDiagram package.
 #
-#    The StatisticalDiagram package is free software: you can redistribute 
+#    The StatisticalDiagram package is free software: you can redistribute
 #    it and/or modify it under the terms of the GNU General Public License
-#    as published by the Free Software Foundation, either version 3 of the 
+#    as published by the Free Software Foundation, either version 3 of the
 #    License, or (at your option) any later version.
 #
-#    The StatisticalDiagram package is distributed in the hope that it 
-#    will be useful, but WITHOUT ANY WARRANTY; without even the implied 
+#    The StatisticalDiagram package is distributed in the hope that it
+#    will be useful, but WITHOUT ANY WARRANTY; without even the implied
 #    warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #    See the GNU General Public License for more details.
 #
@@ -26,10 +26,10 @@ rmsds = lambda gamma,R:sqrt(1.+gamma**2-2.*gamma*R)
 class StatsDiagram:
     """Base class for statistical summary diagrams based on two arrays of
     the same size that will be compared on a point to point base.
-    The first array is considered the data to be evaluated, the second is 
-    the reference data. It computes all the basic metrics using the 
+    The first array is considered the data to be evaluated, the second is
+    the reference data. It computes all the basic metrics using the
     ``self._stats`` function:
-    
+
           :self.std: the standard deviation of the reference data
           :self.E0: the mean bias of the two data sets
           :self.gama: the ratio of the std of data over reference data
@@ -39,7 +39,7 @@ class StatsDiagram:
     def __init__(self,data,refdata,*opts,**keys):
          self._stats(data,refdata,*opts,**keys)
     def __call__(self,data,refdata,*opts,**keys):
-        """Recomputes metrics for new data.""" 
+        """Recomputes metrics for new data."""
         self._stats(data,refdata,*opts,**keys)
     def _stats(self,data,refdata,*opts,**keys):
         """Computes the basic metrics of the data to be evaluated and
@@ -151,11 +151,11 @@ class Taylor:
             r+=dr
         xlabel('$\sigma/\sigma_{ref}$',fontsize=16)
         ylabel('$\sigma/\sigma_{ref}$',fontsize=16)
- 
+
 class TaylorDiagram(Taylor,Stats):
     """Class for drawing a Taylor diagram using the pre-calculated metrics."""
     def __init__(self,gam,E0,rho,R=2.5,dr=.5,antiCorrelation=True,marker='o',s=40,*opts,**keys):
-        """Initialises the class given the pre-calculated metrics and draws 
+        """Initialises the class given the pre-calculated metrics and draws
         the diagram grid with the first point.
         Markers in the diagram are colour-coded using the mean bias.
 
@@ -188,7 +188,7 @@ class TaylorDiagram(Taylor,Stats):
         self._cmin=-self._cmax
         self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
     def add(self,gam,E0,R,marker='o',s=40,*opts,**keys):
-        """Function to add additional points to the diagram, using invoked 
+        """Function to add additional points to the diagram, using invoked
         by means of the ``__call__`` function."""
         E=rmsds(gam,R)
         scatter(gam*R,gam*sin(arccos(R)),c=E0,vmin=self._cmin,vmax=self._cmax,marker=marker,s=s,*opts,**keys)
@@ -203,7 +203,7 @@ class TaylorDiagram(Taylor,Stats):
 
 class TargetDiagram(Target,Stats):
     def __init__(self,gam,E0,rho,marker='o',s=40,antiCorrelation=False,*opts,**keys):
-        """Initialises the class given the pre-calculated metrics and draws 
+        """Initialises the class given the pre-calculated metrics and draws
         the diagram grid with the first point.
         Markers in the diagram are colour-coded using the mean bias.
 
@@ -232,7 +232,7 @@ class TargetDiagram(Target,Stats):
         Stats.__call__(self,gam,E0,rho)
         self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
     def add(self,gam,E0,R,marker='o',s=40,*opts,**keys):
-        """Function to add additional points to the diagram, using invoked 
+        """Function to add additional points to the diagram, using invoked
         by means of the ``__call__`` function."""
         sig= gam>1 and 1 or -1
         E=sqrt(1.+gam**2-2.*gam*R)
@@ -250,7 +250,7 @@ class TargetDiagram(Target,Stats):
 
 class TargetStatistics(StatsDiagram,TargetDiagram):
     def __init__(self,data,refdata,marker='o',s=40,antiCorrelation=False,*opts,**keys):
-        """Initialises the class computing all necessary metrics and draws 
+        """Initialises the class computing all necessary metrics and draws
         the diagram grid with the first point.
         Markers in the diagram are colour-coded using the mean bias.
 
@@ -281,7 +281,7 @@ class TargetStatistics(StatsDiagram,TargetDiagram):
 
 class TaylorStatistics(StatsDiagram,TaylorDiagram):
     def __init__(self,data,refdata,R=2.5,dr=.5,antiCorrelation=True,marker='o',s=40,*opts,**keys):
-        """Initialises the class computing all necessary metrics and draws 
+        """Initialises the class computing all necessary metrics and draws
         the diagram grid with the first point.
         Markers in the diagram are colour-coded using the mean bias.
 
@@ -319,8 +319,6 @@ class TaylorStatistics(StatsDiagram,TaylorDiagram):
 #from StatsDiagram import *
 #from numpy.random import randn
 #from matplotlib.pyplot import show,subplot
-#from scipy.stats import pearsonr
-
 
 #a=randn(10)
 #b=randn(10)

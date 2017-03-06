@@ -7,10 +7,24 @@ Python package for drawing statistical summary diagrams such as Taylor or Target
 To use it, add the top-level of the repository to your PYTHONPATH or move or link the StatsDiagram folder to some location included in your PYTHONPATH.
 
 
-Simple Example:
-_______________
+Installation:
+-------------
 
-::
+After downloading the source from the repository install via pip, descend
+into the top-level of the source tree
+and launch::
+
+  pip3 install .
+
+or to install in developers mode::
+
+  pip3 install -e .
+
+Simple Example:
+---------------
+
+.. code-block:: python
+
   from StatsDiagram import *
   from numpy.random import randn
   from matplotlib.pyplot import show,subplot
