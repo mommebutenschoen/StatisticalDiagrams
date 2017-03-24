@@ -37,6 +37,7 @@ class StatsDiagram:
           :self.E: the root-mean square difference of the two dataset
     """
     def __init__(self,data,refdata,*opts,**keys):
+         self.csv=""
          self._stats(data,refdata,*opts,**keys)
     def __call__(self,data,refdata,*opts,**keys):
         """Recomputes metrics for new data."""
@@ -51,7 +52,14 @@ class StatsDiagram:
         self.gamma=dat.std()/self.std
         self.R,self.p=pearsonr(dat,ref)
         self.E=rmsds(self.gamma,self.R)
+        self.addCSV()
         print(self)
+    def addCSV(self,):
+        self.csv+="{:1.5f}, {:1.5f}, {:1.5f}, {:1.5f}\n".format(self.E0,self.E,self.std,self.R)
+    def writeCSV(self,filename,*opts,**keys):
+        with open(filename,*opts,**keys) as fid:
+            fid.write("Bias, unbiased RMS, STD, Pearson Correlation\n")
+            fid.write(self.csv)
     def __str__(self):
         return "\tNormalised Bias: "+str(self.E0)+\
            "\n\tNormalised Unbiased RMSD: "+str(self.E)+\
@@ -70,6 +78,7 @@ class Stats:
         self.R=rho
         self.gamma=gam
         self.E=rmsds(gam,rho)
+        self.addCSV()
         print(self)
     def __call__(self,gam,E0,rho):
         """Reloading the necessary metrics."""
@@ -77,7 +86,14 @@ class Stats:
         self.R=rho
         self.gamma=gam
         self.E=rmsds(gam,rho)
+        self.addCSV()
         print(self)
+    def addCSV(self,):
+        self.csv+="{:1.5f}, {:1.5f}, {:1.5f}, {:1.5f}\n".format(self.E0,self.E,self.std,self.R)
+    def writeCSV(self,filename,*opts,**keys):
+        with open(filename,*opts,**keys) as fid:
+            fid.write("Bias, unbiased RMS, STD, Pearson Correlation\n")
+            fid.write(self.csv)
     def __str__(self):
         return "\tNormalised Bias: "+str(self.E0)+\
           "\n\tNormalised Unbiased RMSD: "+str(self.E)+\

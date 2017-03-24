@@ -14,6 +14,7 @@ class StatsDiagram:
     def __init__(self,data,refdata,precision,*opts,**keys):
         """In the robust case a precision of the reference data is required.
         This represents the measurment precision and ensures that the scale measure can not be lesser than the precision. In this case a warning is issued and the scale measure of the reference replaced by the precision."""
+        self.csv=""
         self._stats(data,refdata,precision,*opts,**keys)
     def __call__(self,data,refdata,precision,*opts,**keys):
         self._stats(data,refdata,precision,*opts,**keys)
@@ -30,7 +31,16 @@ class StatsDiagram:
         self.gamma=scaleFun(dat)/self.scale
         self.R,self.p=spearmanr(dat,ref)
         self.E=scaleDiff(data-bias,ref)/self.scale
+        self.addCSV()
         print(self)
+
+    def addCSV(self,):
+        self.csv+="{:1.5f}, {:1.5f}, {:1.5f}, {:1.5f}\n".format(self.E0,self.E,self.scale,self.R)
+
+    def writeCSV(self,filename,*opts,**keys):
+        with open(filename,*opts,**keys) as fid:
+            fid.write("Bias, unbiased MAE, IQR, Spearman Correlation\n")
+            fid.write(self.csv)
 
     def __str__(self):
         return "\tNormalised Bias: "+str(self.E0)+\
@@ -41,18 +51,27 @@ class StatsDiagram:
 	    "\n\tReference Scale: "+str(self.scale)+'\n'
 
 class Stats:
+
     def __init__(self,gam,E0,E,rho):
         self.E0=E0
         self.R=rho
         self.gamma=gam
         self.E=E
         print(self)
+        self.addCSV()
     def __call__(self,gam,E0,E,rho):
         self.E0=E0
         self.R=rho
         self.gamma=gam
         self.E=E
         print(self)
+        self.addCSV()
+    def addCSV(self,):
+        self.csv+="{:1.5f}, {:1.5f}, {:1.5f}, {:1.5f}\n".format(self.E0,self.E,self.scale,self.R)
+    def writeCSV(self,filename,*opts,**keys):
+        with open(filename,*opts,**keys) as fid:
+            fid.write("Bias, unbiased MAE, IQR,Spearman Correlation\n")
+            fid.write(self.csv)
     def __str__(self):
         return "\tNormalised Bias: "+str(self.E0)+\
             "\n\tNormalised Difference Scale: "+str(self.E)+\
