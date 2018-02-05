@@ -13,7 +13,7 @@ diffLable="MAE"
 class StatsDiagram:
     def __init__(self,data,refdata,precision,*opts,**keys):
         """In the robust case a precision of the reference data is required.
-        This represents the measurment precision and ensures that the scale measure can not be lesser than the precision. In this case a warning is issued and the scale measure of the reference replaced by the precision."""
+        This represents the measurment precision and ensures that the scale measure can not be lesser than the precision. In this case a warning is issued and the scale measure of the reference is replaced by the precision."""
         self.csv=""
         self._stats(data,refdata,precision,*opts,**keys)
     def __call__(self,data,refdata,precision,*opts,**keys):
