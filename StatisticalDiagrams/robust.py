@@ -133,12 +133,12 @@ class TargetDiagram(Target,Stats):
         scatter(atleast_1d(sig*E),atleast_1d(E0),c=atleast_1d(R),
             vmin=self._cmin,vmax=self._cmax,marker=marker,s=s,*opts,**keys)
         self._lpos.append((sig*E,E0))
-        rmax=abs(array(axis('scaled'))).max()
+        rmax=max(abs(array(axis('scaled'))).max(),1.5)
         plot((0,0),(-rmax,rmax),'k-')
         plot((rmax,-rmax),(0,0),'k-')
         axis(xmin=-rmax,xmax=rmax,ymax=rmax,ymin=-rmax)
     def labels(self,lstr,*opts,**keys):
-        rmax=abs(array(axis())).max()
+        rmax=max(abs(array(axis())).max(),1.5)
         for n,p in enumerate(self._lpos):
             text(p[0]+.025*rmax,p[1]+.025*rmax,lstr[n],*opts,**keys)
 
@@ -163,10 +163,10 @@ class TargetStatistics(StatsDiagram,TargetDiagram):
         scatter(atleast_1d(sig*E),atleast_1d(E0),c=atleast_1d(R),
             vmin=self._cmin,vmax=self._cmax,marker=marker,s=s,*opts,**keys)
         self._lpos.append((sig*E,E0))
-        rmax=abs(array(axis('scaled'))).max()
+        rmax=max(abs(array(axis('scaled'))).max(),1.5)
         axis(xmin=-rmax,xmax=rmax,ymax=rmax,ymin=-rmax)
     def labels(self,lstr,*opts,**keys):
-        rmax=abs(array(axis())).max()
+        rmax=max(abs(array(axis())).max(),1.5)
         for n,p in enumerate(self._lpos):
             text(p[0]+.025*rmax,p[1]+.025*rmax,lstr[n],*opts,**keys)
 
