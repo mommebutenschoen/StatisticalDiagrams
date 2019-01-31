@@ -17,7 +17,7 @@
 #
 
 from __future__ import print_function
-from numpy import sqrt,arange,sin,cos,pi,abs,arccos,array
+from numpy import sqrt,arange,sin,cos,pi,abs,arccos,array,atleast_1d
 from scipy.stats import pearsonr
 from matplotlib.pyplot import plot,axis,scatter,xlabel,ylabel,clabel,colorbar,text,subplot
 
@@ -207,7 +207,8 @@ class TaylorDiagram(Taylor,Stats):
         """Function to add additional points to the diagram, using invoked
         by means of the ``__call__`` function."""
         E=rmsds(gam,R)
-        scatter(gam*R,gam*sin(arccos(R)),c=E0,vmin=self._cmin,vmax=self._cmax,marker=marker,s=s,*opts,**keys)
+        scatter(atleast_1d(gam*R),atleast_1d(gam*sin(arccos(R))),c=atleast_1d(E0),
+            vmin=self._cmin,vmax=self._cmax,marker=marker,s=s,*opts,**keys)
         self._lpos.append((gam*R,gam*sin(arccos(R))))
         axis(**self._axis)
     def labels(self,lstr,*opts,**keys):
@@ -252,7 +253,8 @@ class TargetDiagram(Target,Stats):
         by means of the ``__call__`` function."""
         sig= gam>1 and 1 or -1
         E=sqrt(1.+gam**2-2.*gam*R)
-        scatter(sig*E,E0,c=R,vmin=self._cmin,vmax=self._cmax,marker=marker,s=s,*opts,**keys)
+        scatter(atleast_1d(sig*E),atleast_1d(E0),c=atleast_1d(R),
+            vmin=self._cmin,vmax=self._cmax,marker=marker,s=s,*opts,**keys)
         self._lpos.append((sig*E,E0))
         rmax=abs(array(axis('scaled'))).max()
         plot((0,0),(-rmax,rmax),'k-')

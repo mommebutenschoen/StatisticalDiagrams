@@ -1,5 +1,5 @@
 from __future__ import print_function
-from numpy import sqrt,arange,sin,cos,pi,abs,arccos,array,median
+from numpy import sqrt,arange,sin,cos,pi,abs,arccos,array,median,atleast_1d
 from scipy.stats import spearmanr
 from matplotlib.pyplot import plot,axis,scatter,xlabel,ylabel,clabel,colorbar,text,subplot,tick_params,xticks,yticks
 from .RobustStatistics import MAE,Qn,unbiasedMAE,IQR,Sn,MID
@@ -130,7 +130,8 @@ class TargetDiagram(Target,Stats):
         self.add(self.gamma,self.E0,self.E,self.R,marker=marker,s=s,*opts,**keys)
     def add(self,gam,E0,E,R,marker='o',s=40,*opts,**keys):
         sig= gam>1 and 1 or -1
-        scatter(sig*E,E0,c=R,vmin=self._cmin,vmax=self._cmax,marker=marker,s=s,*opts,**keys)
+        scatter(atleast_1d(sig*E),atleast_1d(E0),c=atleast_1d(R),
+            vmin=self._cmin,vmax=self._cmax,marker=marker,s=s,*opts,**keys)
         self._lpos.append((sig*E,E0))
         rmax=abs(array(axis('scaled'))).max()
         plot((0,0),(-rmax,rmax),'k-')
@@ -159,7 +160,8 @@ class TargetStatistics(StatsDiagram,TargetDiagram):
         self.add(self.gamma,self.E0,self.E,self.R,marker=marker,s=s,*opts,**keys)
     def add(self,gam,E0,E,R,marker='o',s=40,*opts,**keys):
         sig= gam>1 and 1 or -1
-        scatter(sig*E,E0,c=R,vmin=self._cmin,vmax=self._cmax,marker=marker,s=s,*opts,**keys)
+        scatter(atleast_1d(sig*E),atleast_1d(E0),c=atleast_1d(R),
+            vmin=self._cmin,vmax=self._cmax,marker=marker,s=s,*opts,**keys)
         self._lpos.append((sig*E,E0))
         rmax=abs(array(axis('scaled'))).max()
         axis(xmin=-rmax,xmax=rmax,ymax=rmax,ymin=-rmax)
