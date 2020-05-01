@@ -2,5 +2,9 @@
 *~
 *.swp
 __pycache__
-ncPyTools.egg-info/
+StatisticalDiagrams.egg-info/
 _build
+_static
+_templates
+build
+dist
