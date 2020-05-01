@@ -1,5 +1,5 @@
 StatisticalDiagrams
-=========
+===================
 
 .. toctree::
    :maxdepth: 4

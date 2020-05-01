@@ -8,15 +8,30 @@ Python package for drawing statistical summary diagrams such as Taylor or Target
 Installation:
 -------------
 
-After downloading the source from the repository install via pip, descend
+After downloading the source from github_ install via pip, descending
 into the top-level of the source tree
-and launch::
+and launching::
 
-  pip3 install .
+  pip install .
 
 or to install in developers mode::
 
-  pip3 install -e .
+  pip install -e .
+
+Or install the latest release from PyPI::
+
+  pip install StatisticalDiagrams
+
+.. _github: https://github.com/mommebutenschoen/StatisticalDiagrams
+
+
+Documentation
+-------------
+
+Documentation of this package can be found on readthedocs_.
+
+.. _readthedocs: https://statisticaldiagrams.readthedocs.io/
+
 
 Simple Example:
 ---------------
