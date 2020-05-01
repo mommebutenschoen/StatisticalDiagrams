@@ -9,7 +9,8 @@ try:
 except:
     pass
 
-binomcoeff=lambda n,k:nearest(comb(n,k))
+def binomcoeff(n,k):
+    nearest(comb(n,k))
 
 def IQR(data):
     q25,q75=mquantiles(data,prob=[.25,.75])
