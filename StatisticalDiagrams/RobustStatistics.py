@@ -1,4 +1,4 @@
-from __future__ import print_function
+import logging
 from numpy import median,empty,logical_or,arange
 from numpy.ma import getmaskarray,getdata,masked_where
 from numpyXtns import nearest
@@ -36,7 +36,7 @@ def MIDExplicit(data):
            d.append(abs(x-y))
     d.sort()
     k=(n+1)*n//2//2
-    print("Moment",k,"of",n+1)
+    logging.info("Moment",k,"of",n+1)
     return d[k]
 
 def Sn(data):
@@ -220,7 +220,7 @@ def MID(data):
             return None
     n=y.shape[0]
     k=n*(n-1)//2//2
-    print("Moment",k,"of",n)
+    logging.info("Moment",k,"of",n)
     y.sort()
     left=n+1 -arange(n)
     right=arange(n)+1

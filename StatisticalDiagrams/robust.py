@@ -1,3 +1,4 @@
+import logging
 from __future__ import print_function
 from numpy import sqrt,arange,sin,cos,pi,abs,arccos,array,median,atleast_1d
 from scipy.stats import spearmanr
@@ -23,9 +24,9 @@ class StatsDiagram:
         ref=array(refdata).ravel()
         self.scale=scaleFun(ref)
         if self.scale<precision:
-            print("Reference scale lesser than measurment precision!")
+            logging.warning("Reference scale lesser than measurment precision!")
             self.scale=precision
-            print("\treplaced by precision",precision)
+            logging.warning("\treplaced by precision",precision)
         bias=median(dat-ref)
         self.E0=(median(dat-ref))/self.scale
         self.gamma=scaleFun(dat)/self.scale
