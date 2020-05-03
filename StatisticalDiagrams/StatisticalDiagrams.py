@@ -1,32 +1,133 @@
+"""
+Standard versions of statistical summary diagrams (Taylor and Target).
+
+Examples:
+
+The following example plots a Taylor and Target Diagrams for three randomly
+generated datasets with respect to randomly distributed reference data: one
+uncorrelated to the reference data with no added bias, one weakly correlated
+with substantially smaller scale and added negative bias and one strongly
+correlated one with substantially larger scale and added positive bias.
+Four plots are generated, two using the ``TargetStatistics`` and
+``TaylorStatistics`` classes that internally computes the summary statistics
+from the datasets and two using the ``TargetDiagram``  and ``TaylorDiagram``
+class and pre-computed summary statistics. The example shows that the outcome is
+equivalent.
+
+.. code-block:: python
+
+  from StatisticalDiagrams import *
+  from numpy.random import randn
+  from matplotlib.pyplot import figure,show
+
+  ref=randn(10)
+  a=randn(10)
+  b=.5*(.25*ref+.75*randn(10)) - .5
+  c=2.*(.75*ref+.25*randn(10)) + .5
+
+  figure()
+  TarS=TargetStatistics(a,ref)
+  TarS(b,ref)
+  TarS(c,ref)
+  figure()
+  TayS=TaylorStatistics(a,ref)
+  TayS(b,ref)
+  TayS(c,ref)
+
+  std1=a.std()
+  std2=b.std()
+  std3=c.std()
+  refstd=ref.std()
+  R1,p=pearsonr(a,ref)
+  E1=(a.mean()-ref.mean())/refstd
+  G1=std1/refstd
+  R2,p=pearsonr(b,ref)
+  E2=(b.mean()-ref.mean())/refstd
+  G2=std2/refstd
+  R3,p=pearsonr(c,ref)
+  E3=(c.mean()-ref.mean())/refstd
+  G3=std3/refstd
+
+  figure()
+  TarD=TargetDiagram(G1,E1,R1,)
+  TarD(G2,E2,R2,)
+  TarD(G3,E3,R3,)
+  figure()
+  TayD=TaylorDiagram(G1,E1,R1,)
+  TayD(G2,E2,R2,)
+  TayD(G3,E3,R3,)
+
+  show()
+
+"""
 from __future__ import print_function
 from numpy import sqrt,arange,sin,cos,pi,abs,arccos,array,atleast_1d
 from scipy.stats import pearsonr
 from matplotlib.pyplot import plot,axis,scatter,xlabel,ylabel,clabel,colorbar,text,subplot
 
-rmsds = lambda gamma,R:sqrt(1.+gamma**2-2.*gamma*R)
+def rmsds(gamma,R):
+    return sqrt(1.+gamma**2-2.*gamma*R)
 
 class StatsDiagram:
+
     """Base class for statistical summary diagrams based on two arrays of
     the same size that will be compared on a point to point base.
     The first array is considered the data to be evaluated, the second is
     the reference data. It computes all the basic metrics using the
-    ``self._stats`` function:
+    ``_stats`` function:
 
-          :self.std: the standard deviation of the reference data
-          :self.E0: the mean bias of the two data sets
-          :self.gama: the ratio of the std of data over reference data
-          :self.R, self.p: the Pearson correlation with p-value
-          :self.E: the root-mean square difference of the two dataset
+    Attributes:
+          std (float): the standard deviation of the reference data
+          E0 (float): the mean bias of the two data sets
+          gama(float): the ratio of the std of data over reference data
+          R(float):
+          p(float): the Pearson correlation with p-value
+          E(float): the root-mean square difference of the two dataset
+          csv(string): collects the summary statistics of the instance to be
+            written to csv file, when desired.
     """
+
     def __init__(self,data,refdata,*opts,**keys):
-         self.csv=""
-         self._stats(data,refdata,*opts,**keys)
-    def __call__(self,data,refdata,*opts,**keys):
-        """Recomputes metrics for new data."""
+
+        """Calls summary statistics function from input data with respect to
+        reference data. Initialises csv attribute.
+
+        Args:
+            data(float array): input data
+            refdata(float array): references data, same shape as input data
+            *opts: positional arguments passed to summary statistics function
+            **keys: keyword arguments passed to summary statistics function
+        """
+
+        self.csv=""
         self._stats(data,refdata,*opts,**keys)
+
+    def __call__(self,data,refdata,*opts,**keys):
+
+        """Recomputes summary statistics for new input and reference data.
+
+        Args:
+            data(float array): input data
+            refdata(float array): references data, same shape as input data
+            *opts: positional arguments passed to summary statistics function
+            **keys: keyword arguments passed to summary statistics function
+        """
+
+        self._stats(data,refdata,*opts,**keys)
+
     def _stats(self,data,refdata,*opts,**keys):
-        """Computes the basic metrics of the data to be evaluated and
-        the reference data."""
+
+        """Summary statistics functionst that computes the relevant metrics of
+        the input data to be evaluated with respect to the reference data, adds
+        them to the csv attribute and prints the summary statistics to stdout.
+
+        Args:
+            data(float array): input data
+            refdata(float array): references data, same shape as input data
+            *opts: positional arguments passed to summary statistics function
+            **keys: keyword arguments passed to summary statistics function
+        """
+
         dat=array(data).ravel()
         ref=array(refdata).ravel()
         self.std=ref.std()
@@ -36,13 +137,29 @@ class StatsDiagram:
         self.E=rmsds(self.gamma,self.R)
         self.addCSV()
         print(self)
+
     def addCSV(self,):
+
+        """Add new set of summary statistics to csv attribute."""
+
         self.csv+="{:1.5f}, {:1.5f}, {:1.5f}, {:1.5f}\n".format(self.E0,self.E,self.std,self.R)
+
     def writeCSV(self,filename,*opts,**keys):
+
+        """Write csv attribute to file.
+
+        Args:
+            filename (string): filename for csv filename
+            *opts: positional arguments passed to `open` function
+            **args" keyword arguments passed to `open` function
+        """
+
         with open(filename,*opts,**keys) as fid:
             fid.write("Bias, unbiased RMS, STD, Pearson Correlation\n")
             fid.write(self.csv)
+
     def __str__(self):
+
         return "\tNormalised Bias: "+str(self.E0)+\
            "\n\tNormalised Unbiased RMSD: "+str(self.E)+\
            "\n\tNormalised RMSD: "+str(sqrt(self.E0**2+self.E**2))+\
@@ -53,29 +170,62 @@ class StatsDiagram:
 
 
 class Stats:
-    """Base class for statistical summary diagrams, using precalculated metrics rather than the full datasets as input."""
+
+    """Base class for statistical summary diagrams, using precomuted metrics rather than the full datasets as input."""
+
     def __init__(self,gam,E0,rho):
-        """Loading the necessary metrics."""
+
+        """Loading the necessary metrics.
+
+        Args:
+            gam (float): STD ratio (Data/Reference)
+            E0 (float): Mean bias
+            rho (float): Correlation Coefficient
+        """
         self.E0=E0
         self.R=rho
         self.gamma=gam
         self.E=rmsds(gam,rho)
         self.addCSV()
         print(self)
+
     def __call__(self,gam,E0,rho):
-        """Reloading the necessary metrics."""
+
+        """Loading new metrics.
+
+        Args:
+            gam (float): STD ratio (Data/Reference)
+            E0 (float): Mean bias
+            rho (float): Correlation Coefficient
+        """
+
         self.E0=E0
         self.R=rho
         self.gamma=gam
         self.E=rmsds(gam,rho)
         self.addCSV()
         print(self)
+
     def addCSV(self,):
+
+        """Add new set of summary statistics to csv attribute."""
+
         self.csv+="{:1.5f}, {:1.5f}, {:1.5f}, {:1.5f}\n".format(self.E0,self.E,self.std,self.R)
+
     def writeCSV(self,filename,*opts,**keys):
+
+        """Write csv attribute to file.
+
+        Args:
+            filename (string): filename for csv filename
+            *opts: positional arguments passed to `open` function
+            **args" keyword arguments passed to `open` function
+        """
+
         with open(filename,*opts,**keys) as fid:
             fid.write("Bias, unbiased RMS, STD, Pearson Correlation\n")
             fid.write(self.csv)
+
     def __str__(self):
         return "\tNormalised Bias: "+str(self.E0)+\
           "\n\tNormalised Unbiased RMSD: "+str(self.E)+\
@@ -84,8 +234,13 @@ class Stats:
           "\n\tSTD Ratio (Data/Reference): "+str(self.gamma)
 
 class Target:
-    """Base class providing a function to draw the grid for Target Diagrams.    """
+
+    """Base class providing a function to draw the grid for Target Diagrams."""
+
     def drawTargetGrid(self):
+
+        """Draws Target Diagram grid."""
+
         a=arange(0,2.01*pi,.02*pi)
         plot(sin(a),cos(a),'k')
         #radius at minimum RMSD' given R:
@@ -99,8 +254,19 @@ class Target:
         xlabel('${sign}(\sigma-\sigma_{ref})*{RMSD}\'/\sigma_{ref}$',fontsize=16)
 
 class Taylor:
-    """Base class providing a function to draw the grid for Taylor Diagrams.    """
+
+    """Base class providing a function to draw the grid for Taylor Diagrams for
+    inheritance along with stats class."""
+
     def drawTaylorGrid(self,R,dr,antiCorrelation):
+        """Draws Taylor Diagram grid.
+
+        Args:
+            R (float): length of rays from origin in Taylor plot
+            dr (float): step-size of circles around ideal point (1,0) in Taylor
+                plot
+            antiCorrelation (boolean): plot also anticorrelation half of diagram
+        """
         if antiCorrelation:
           a0=-1.
         else:
@@ -151,16 +317,42 @@ class Taylor:
         ylabel('$\sigma/\sigma_{ref}$',fontsize=16)
 
 class TaylorDiagram(Taylor,Stats):
-    """Class for drawing a Taylor diagram using the pre-calculated metrics."""
+
+    """Class for drawing a Taylor diagram from pre-calculated metrics.
+
+    Attributes:
+          std (float): the standard deviation of the reference data
+          E0 (float): the mean bias of the two data sets
+          gama(float): the ratio of the std of data over reference data
+          R(float): Pearson correlation
+          p(float): p-value of Pearson correlation
+          E(float): the root-mean square difference of the two dataset
+          csv(string): collects the summary statistics of the instance to be
+            written to csv file, when desired.
+    """
+
     def __init__(self,gam,E0,rho,R=2.5,dr=.5,antiCorrelation=True,marker='o',s=40,*opts,**keys):
+
         """Initialises the class given the pre-calculated metrics and draws
         the diagram grid with the first point.
         Markers in the diagram are colour-coded using the mean bias.
 
-             :antiCorrelation: show negative correlations
-             :marker: shape used to show points, should be hollow shape to
-                      be filled with colour code.
+        Args:
+            gam (float): STD ratio (Data/Reference)
+            E0 (float): Mean bias
+            rho (float): Correlation Coefficient
+            R (float): length of rays from origin in Taylor plot
+            dr (float): step-size of circles around ideal point (1,0) in Taylor
+                plot
+            antiCorrelation (boolean): if True, show negative correlations
+            marker: shape used to show points, should be a hollow shape as it is
+                filled with colour code for bias.
+            s (integer scalar or array_like): marker size in points
+            opts: positional arguments passed to ``add``
+                function
+            keys: keyword arguments passed to ``add`` function
         """
+
         Stats.__init__(self,gam,E0,rho)
         R=max(int(2.*self.gamma+1.)/2.,1.5)
         self.drawTaylorGrid(R,dr,antiCorrelation)
@@ -174,42 +366,100 @@ class TaylorDiagram(Taylor,Stats):
         self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
         self.cbar=colorbar()
         self.cbar.set_label('${Bias}/\sigma_{ref}$')
+
     def __call__(self,gam,E0,rho,marker='o',s=40,*opts,**keys):
+
         """Adds points to the diagram adjusting the colour codes.
 
-             :antiCorrelation: show negative correlations
-             :marker: shape used to show points, should be hollow shape to
-                      be filled with colour code.
+        Args:
+            gam (float): STD ratio (Data/Reference)
+            E0 (float): Mean bias
+            rho (float): Correlation Coefficient
+            marker: shape used to show points, should be a hollow shape as it is
+                filled with colour code for bias.
+            s (integer scalar or array_like): marker size in points
+            opts: positional arguments passed to ``add``
+                function
+            keys: keyword arguments passed to ``add`` function
         """
         Stats.__call__(self,gam,E0,rho,*opts,**keys)
         self._cmax=max(abs(self.E0),self._cmax)
         self._cmin=-self._cmax
         self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
+
     def add(self,gam,E0,R,marker='o',s=40,*opts,**keys):
-        """Function to add additional points to the diagram, using invoked
-        by means of the ``__call__`` function."""
+
+        """Function to add additional points to the diagram, usually invoked
+        by means of the ``__call__`` function.
+
+        Args:
+            gam (float): STD ratio (Data/Reference)
+            E0 (float): Mean bias
+            R (float): Correlation Coefficient
+            marker: shape used to show points, should be a hollow shape as it is
+                filled with colour code for bias.
+            s (integer scalar or array_like): marker size in points
+            opts: positional arguments passed to matplotlib.pyplot.scatter
+                function
+            keys: keyword arguments passed to ``matplotlib.pyplot.scatter`` function
+        """
+
         E=rmsds(gam,R)
         scatter(atleast_1d(gam*R),atleast_1d(gam*sin(arccos(R))),c=atleast_1d(E0),
             vmin=self._cmin,vmax=self._cmax,marker=marker,s=s,*opts,**keys)
         self._lpos.append((gam*R,gam*sin(arccos(R))))
         axis(**self._axis)
+
     def labels(self,lstr,*opts,**keys):
-        """Adds labels ``lstr``` to the points in the diagram"""
+
+        """Adds labels ``lstr``` to the points in the diagram.
+
+        Args:
+            lstr (string): string for lable
+            *opts: positional arguments passed to ``matplotlib.pyplot.text``
+                function.
+            **keys: keyword arguments passed to ``matplotlib.pyplot.text``
+                function.
+
+        """
         yrange=axis()[2:]
         rmax=max(abs(yrange[1]-yrange[0]),1.5)
         for n,p in enumerate(self._lpos):
            text(p[0]+.025*rmax,p[1]+.025*rmax,lstr[n],*opts,**keys)
 
 class TargetDiagram(Target,Stats):
+
+    """Class for drawing a Target diagram from pre-calculated metrics.
+
+    Attributes:
+          std (float): the standard deviation of the reference data
+          E0 (float): the mean bias of the two data sets
+          gama(float): the ratio of the std of data over reference data
+          R(float): Pearson correlation
+          p(float): p-value of Pearson correlation
+          E(float): the root-mean square difference of the two dataset
+          csv(string): collects the summary statistics of the instance to be
+            written to csv file, when desired.
+    """
+
     def __init__(self,gam,E0,rho,marker='o',s=40,antiCorrelation=False,*opts,**keys):
+
         """Initialises the class given the pre-calculated metrics and draws
         the diagram grid with the first point.
         Markers in the diagram are colour-coded using the mean bias.
 
-             :antiCorrelation: show negative correlations
-             :marker: shape used to show points, should be hollow shape to
-                      be filled with colour code.
+        Args:
+            gam (float): STD ratio (Data/Reference)
+            E0 (float): Mean bias
+            rho (float): Correlation Coefficient
+            marker: shape used to show points, should be a hollow shape as it is
+                filled with colour code for bias.
+            s (integer scalar or array_like): marker size in points
+            antiCorrelation (boolean): if True, show negative correlations
+            opts: positional arguments passed to ``add`` function
+            keys: keyword arguments passed to ``add`` function
         """
+
         Stats.__init__(self,gam,E0,rho)
         self.drawTargetGrid()
         if antiCorrelation:
@@ -222,17 +472,38 @@ class TargetDiagram(Target,Stats):
         self.cbar=colorbar()
         self.cbar.set_label('Correlation Coefficient')
     def __call__(self,gam,E0,rho,marker='o',s=40,*opts,**keys):
-        """Adds points to the diagram adjusting the colour codes.
 
-             :antiCorrelation: show negative correlations
-             :marker: shape used to show points, should be hollow shape to
-                      be filled with colour code.
+        """Adds points to the diagram adjusting the colour codes
+
+        Args:
+            gam (float): STD ratio (Data/Reference)
+            E0 (float): Mean bias
+            rho (float): Correlation Coefficient
+            marker: shape used to show points, should be a hollow shape as it is
+                filled with colour code for bias.
+            s (integer scalar or array_like): marker size in points
+            opts: positional arguments passed to ``add`` function
+            keys: keyword arguments passed to ``add`` function
         """
+
         Stats.__call__(self,gam,E0,rho)
         self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
     def add(self,gam,E0,R,marker='o',s=40,*opts,**keys):
-        """Function to add additional points to the diagram, using invoked
-        by means of the ``__call__`` function."""
+
+        """Function to add additional points to the diagram, usually invoked
+        by means of the ``__call__`` function.
+
+        Args:
+            gam (float): STD ratio (Data/Reference)
+            E0 (float): Mean bias
+            R (float): Correlation Coefficient
+            marker: shape used to show points, should be a hollow shape as it is
+                filled with colour code for bias.
+            opts: positional arguments passed to matplotlib.pyplot.scatter
+                function
+            keys: keyword arguments passed to ``matplotlib.pyplot.scatter`` function
+        """
+
         sig= gam>1 and 1 or -1
         E=sqrt(1.+gam**2-2.*gam*R)
         scatter(atleast_1d(sig*E),atleast_1d(E0),c=atleast_1d(R),
@@ -242,21 +513,52 @@ class TargetDiagram(Target,Stats):
         plot((0,0),(-rmax,rmax),'k-')
         plot((rmax,-rmax),(0,0),'k-')
         axis(xmin=-rmax,xmax=rmax,ymax=rmax,ymin=-rmax)
+
     def labels(self,lstr,*opts,**keys):
-        """Adds labels ``lstr``` to the points in the diagram"""
+
+        """Adds labels ``lstr``` to the points in the diagram.
+
+        Args:
+            lstr (string): string for lable
+            *opts: positional arguments passed to ``matplotlib.pyplot.text``
+                function.
+            **keys: keyword arguments passed to ``matplotlib.pyplot.text``
+                function.
+        """
+
         rmax=max(abs(array(axis())).max(),1.5)
         for n,p in enumerate(self._lpos):
            text(p[0]+.025*rmax,p[1]+.025*rmax,lstr[n],*opts,**keys)
 
 class TargetStatistics(StatsDiagram,TargetDiagram):
+
+    """Class for drawing a Taylor diagram from input and reference data.
+
+    Attributes:
+          std (float): the standard deviation of the reference data
+          E0 (float): the mean bias of the two data sets
+          gama(float): the ratio of the std of data over reference data
+          R(float): Pearson correlation
+          p(float): the Pearson correlation with p-value
+          E(float): the root-mean square difference of the two dataset
+          csv(string): collects the summary statistics of the instance to be
+            written to csv file, when desired.
+    """
+
     def __init__(self,data,refdata,marker='o',s=40,antiCorrelation=False,*opts,**keys):
         """Initialises the class computing all necessary metrics and draws
         the diagram grid with the first point.
         Markers in the diagram are colour-coded using the mean bias.
 
-             :antiCorrelation: show negative correlations
-             :marker: shape used to show points, should be hollow shape to
-                      be filled with colour code.
+        Args:
+            data(float array): input data
+            refdata(float array): references data, same shape as input data
+            marker: shape used to show points, should be a hollow shape as it is
+                filled with colour code for bias.
+            s (integer scalar or array_like): marker size in points
+            antiCorrelation (boolean): if True, show negative correlations
+            opts: positional arguments passed to ``add`` function
+            keys: keyword arguments passed to ``add`` function
         """
         StatsDiagram.__init__(self,data,refdata,*opts,**keys)
         self.drawTargetGrid()
@@ -269,26 +571,57 @@ class TargetStatistics(StatsDiagram,TargetDiagram):
         self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
         self.cbar=colorbar()
         self.cbar.set_label('Correlation Coefficient')
+
     def __call__(self,data,refdata,marker='o',s=40,*opts,**keys):
+
         """Adds points to the diagram adjusting the colour codes.
 
-             :antiCorrelation: show negative correlations
-             :marker: shape used to show points, should be hollow shape to
-                      be filled with colour code.
+        Args:
+            data(float array): input data
+            refdata(float array): references data, same shape as input data
+            marker: shape used to show points, should be a hollow shape as it is
+                filled with colour code for bias.
+            s (integer scalar or array_like): marker size in points
+            opts: positional arguments passed to ``add`` function
+            keys: keyword arguments passed to ``add`` function
         """
         StatsDiagram.__call__(self,data,refdata,*opts,**keys)
         self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
 
 class TaylorStatistics(StatsDiagram,TaylorDiagram):
+
+    """Class for drawing a Taylor diagram from input and reference data.
+
+    Attributes:
+          std (float): the standard deviation of the reference data
+          E0 (float): the mean bias of the two data sets
+          gama(float): the ratio of the std of data over reference data
+          R(float): Pearson correlation
+          p(float): the Pearson correlation with p-value
+          E(float): the root-mean square difference of the two dataset
+          csv(string): collects the summary statistics of the instance to be
+            written to csv file, when desired.
+    """
+
     def __init__(self,data,refdata,R=2.5,dr=.5,antiCorrelation=True,marker='o',s=40,*opts,**keys):
         """Initialises the class computing all necessary metrics and draws
         the diagram grid with the first point.
         Markers in the diagram are colour-coded using the mean bias.
 
-             :antiCorrelation: show negative correlations
-             :marker: shape used to show points, should be hollow shape to
-                      be filled with colour code.
+        Args:
+            data(float array): input data
+            refdata(float array): references data, same shape as input data
+            R (float): length of rays from origin in Taylor plot
+            dr (float): step-size of circles around ideal point (1,0) in Taylor
+                plot
+            marker: shape used to show points, should be a hollow shape as it is
+                filled with colour code for bias.
+            s (integer scalar or array_like): marker size in points
+            antiCorrelation (boolean): if True, show negative correlations
+            opts: positional arguments passed to ``add`` function
+            keys: keyword arguments passed to ``add`` function
         """
+
         StatsDiagram.__init__(self,data,refdata,*opts,**keys)
         R=max(int(2.*self.gamma+1.)/2.,1.5)
         self.drawTaylorGrid(R,dr,antiCorrelation)
@@ -302,49 +635,21 @@ class TaylorStatistics(StatsDiagram,TaylorDiagram):
         self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
         self.cbar=colorbar()
         self.cbar.set_label('${Bias}/\sigma_{ref}$')
+
     def __call__(self,data,refdata,marker='o',s=40,*opts,**keys):
+
         """Adds points to the diagram adjusting the colour codes.
 
-             :antiCorrelation: show negative correlations
-             :marker: shape used to show points, should be hollow shape to
-                      be filled with colour code.
+            data(float array): input data
+            refdata(float array): references data, same shape as input data
+            marker: shape used to show points, should be a hollow shape as it is
+                filled with colour code for bias.
+            s (integer scalar or array_like): marker size in points
+            opts: positional arguments passed to ``add`` function
+            keys: keyword arguments passed to ``add`` function
         """
+
         StatsDiagram.__call__(self,data,refdata,*opts,**keys)
         self._cmax=max(abs(self.E0),self._cmax)
         self._cmin=-self._cmax
         self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
-
-#Examples:
-
-#from StatsDiagram import *
-#from numpy.random import randn
-#from matplotlib.pyplot import show,subplot
-
-#a=randn(10)
-#b=randn(10)
-#ref=randn(10)
-#subplot(221)
-#TD=TargetStatistics(a,ref)
-#TD(b,ref)
-#subplot(222)
-#TD=TaylorStatistics(a,ref)
-#TD(b,ref)
-
-#std1=a.std()
-#std2=b.std()
-#refstd=ref.std()
-#R1,p=pearsonr(a,ref)
-#E1=(a.mean()-ref.mean())/refstd
-#G1=std1/refstd
-#R2,p=pearsonr(b,ref)
-#E2=(b.mean()-ref.mean())/refstd
-#G2=std2/refstd
-
-#subplot(223)
-#TayD=TargetDiagram(G1,E1,R1,)
-#TayD(G2,E2,R2,)
-#subplot(224)
-#TarD=TaylorDiagram(G1,E1,R1,)
-#TarD(G2,E2,R2,)
-
-#show()
