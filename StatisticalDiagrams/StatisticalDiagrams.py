@@ -67,6 +67,18 @@ from scipy.stats import pearsonr
 from matplotlib.pyplot import figure
 
 def rmsds(gamma,R):
+
+    """Computes normalised unbiased root-mean-square difference from correlation and
+    standard deviation ratio.
+
+    Args:
+        gamma (float): ratio of standard deviations
+        R (float): correlation coefficient
+
+    Returns:
+        normalised unbiased root-mean-square difference.
+    """
+
     return sqrt(1.+gamma**2-2.*gamma*R)
 
 class StatsDiagram:
