@@ -1,16 +1,20 @@
 import logging
-from numpy import median,empty,logical_or,arange
+from numpy import median,empty,logical_or,arange,round
 from numpy.ma import getmaskarray,getdata,masked_where
-from numpyXtns import nearest
-from scipy.misc import comb
+try:
+    from scipy.special import comb
+except ImportError:
+    from scipy.misc import comb
 from scipy.stats.mstats import mquantiles
 try:
     from itertools import izip as zip
 except:
     pass
 
+_nearest = lambda x:int(round(s))
+
 def binomcoeff(n,k):
-    nearest(comb(n,k))
+    _nearest(comb(n,k))
 
 def IQR(data):
     q25,q75=mquantiles(data,prob=[.25,.75])
@@ -324,7 +328,7 @@ def QnExplicit(data,c=2.2219):
    else:
         if n%2==1: dn=n/(n+1.4)
         else: dn=n/(n+3.8)
-   dists=empty(nearest(binomcoeff(n,2)))
+   dists=empty(_nearest(binomcoeff(n,2)))
    k=0
    for j,d1 in enumerate(data):
       for m,d2 in enumerate(data[:j]):
