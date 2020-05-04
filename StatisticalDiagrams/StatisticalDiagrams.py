@@ -186,6 +186,7 @@ class Stats:
         self.R=rho
         self.gamma=gam
         self.E=rmsds(gam,rho)
+        self.csv=""
         self.addCSV()
         print(self)
 
@@ -210,7 +211,7 @@ class Stats:
 
         """Add new set of summary statistics to csv attribute."""
 
-        self.csv+="{:1.5f}, {:1.5f}, {:1.5f}, {:1.5f}\n".format(self.E0,self.E,self.std,self.R)
+        self.csv+="{:1.5f}, {:1.5f}, {:1.5f}, {:1.5f}\n".format(self.E0,self.E,self.gamma,self.R)
 
     def writeCSV(self,filename,*opts,**keys):
 

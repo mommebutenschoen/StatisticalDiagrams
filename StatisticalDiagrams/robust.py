@@ -204,6 +204,7 @@ class Stats:
         self.gamma=gam
         self.E=E
         print(self)
+        self.csv=""
         self.addCSV()
 
     def __call__(self,gam,E0,E,rho):
@@ -227,7 +228,7 @@ class Stats:
 
         """Add new set of summary statistics to csv attribute."""
 
-        self.csv+="{:1.5f}, {:1.5f}, {:1.5f}, {:1.5f}\n".format(self.E0,self.E,self.scale,self.R)
+        self.csv+="{:1.5f}, {:1.5f}, {:1.5f}, {:1.5f}\n".format(self.E0,self.E,self.gamma,self.R)
 
     def writeCSV(self,filename,*opts,**keys):
 
