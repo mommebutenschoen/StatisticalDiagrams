@@ -32,8 +32,9 @@ that the outcome is equivalent.
   b=.5*(.25*ref+.75*randn(10)) - .5
   c=2.*(.75*ref+.25*randn(10)) + .5
 
-  f1=figure()
-  TD=TargetStatistics(a,ref,precision=1.e-15)
+  f=figure(figsize=[12,5])
+  ax1=f.add_subplot(121)
+  TD=TargetStatistics(a,ref,precision=1.e-15,ax=ax1)
   TD(b,ref,precision=1.e-15)
   TD(c,ref,precision=1.e-15)
   show()
@@ -54,8 +55,8 @@ that the outcome is equivalent.
   scale3=IQR(c)
   E3=MAE(c-E0_3*refscale,ref)/refscale
 
-  f2=figure()
-  TD=TargetDiagram(scale1/refscale,E0_1,E1,R1)
+  ax2=f.add_subplot(122)
+  TD=TargetDiagram(scale1/refscale,E0_1,E1,R1,ax=ax2)
   TD(scale2/refscale,E0_2,E2,R2)
   TD(scale3/refscale,E0_3,E3,R3)
   show()
@@ -93,7 +94,7 @@ class StatsDiagram:
             written to csv file, when desired.
     """
 
-    def __init__(self,data,refdata,precision,*opts,**keys):
+    def __init__(self,data,refdata,precision):
 
         """Calls summary statistics function from input data with respect to
         reference data. Initialises csv attribute. In the robust case a
@@ -111,9 +112,9 @@ class StatsDiagram:
         """
 
         self.csv=""
-        self._stats(data,refdata,precision,*opts,**keys)
+        self._stats(data,refdata,precision)
 
-    def __call__(self,data,refdata,precision,*opts,**keys):
+    def __call__(self,data,refdata,precision):
 
         """Recomputes summary statistics for new input and reference data.
 
@@ -125,9 +126,9 @@ class StatsDiagram:
             **keys: keyword arguments passed to summary statistics function
         """
 
-        self._stats(data,refdata,precision,*opts,**keys)
+        self._stats(data,refdata,precision)
 
-    def _stats(self,data,refdata,precision,*opts,**keys):
+    def _stats(self,data,refdata,precision):
 
         """Summary statistics functionst that computes the relevant metrics of
         the input data to be evaluated with respect to the reference data, adds
@@ -253,7 +254,20 @@ class Stats:
 
 class Target:
 
-    """Base class providing a function to draw the grid for Target Diagrams."""
+    """Base class providing a function to draw the grid for Target Diagrams.
+
+    Args:
+        ax (matplotlib.axes.Axes): axes containing the diagram.
+    """
+
+    def __init__(self,ax):
+
+        """
+        Args:
+            ax (matplotlib.axes.Axes): axes to use, if False creates new Axes
+        """
+
+        self.ax=ax
 
     def drawTargetGrid(self):
 
@@ -262,24 +276,25 @@ class Target:
         majL=MultipleLocator(1)
         minL=MultipleLocator(.5)
         majF=NullFormatter()
-        ax=subplot(111)
-        plot(0.,0.,'ko',markersize=12)
-        ax.spines['left'].set_position('center')
-        ax.spines['bottom'].set_position('center')
-        ax.spines['right'].set_position('center')
-        ax.spines['top'].set_position('center')
-        tick_params(which='major',length=5,width=1.5)
-        tick_params(which='minor',length=3,width=1.2)
+        self.ax.plot(0.,0.,'ko',markersize=12)
+        self.ax.spines['left'].set_position('center')
+        self.ax.spines['bottom'].set_position('center')
+        self.ax.spines['right'].set_position('center')
+        self.ax.spines['top'].set_position('center')
+        self.ax.tick_params(which='major',length=5,width=1.5)
+        self.ax.tick_params(which='minor',length=3,width=1.2)
         #ax.xaxis.set_ticklabels([])
         #ax.yaxis.set_ticklabels([])
-        ax.xaxis.set_major_formatter(majF)
-        ax.yaxis.set_major_formatter(majF)
-        ax.xaxis.set_major_locator(majL)
-        ax.xaxis.set_minor_locator(minL)
-        ax.yaxis.set_major_locator(majL)
-        ax.yaxis.set_minor_locator(minL)
-        xticks((-1,1),("-1","1"))
-        yticks((-1,1),("-1","1"))
+        self.ax.xaxis.set_major_formatter(majF)
+        self.ax.yaxis.set_major_formatter(majF)
+        self.ax.xaxis.set_major_locator(majL)
+        self.ax.xaxis.set_minor_locator(minL)
+        self.ax.yaxis.set_major_locator(majL)
+        self.ax.yaxis.set_minor_locator(minL)
+        self.ax.set_xticks((-1,1))
+        self.ax.set_xticklabels(("-1","1"))
+        self.ax.set_yticks((-1,1))
+        self.ax.set_yticklabels(("-1","1"))
         #radius at minimum RMSD' given R:
         #  Mr=sqrt(1+R^2-2R^2)
         #for R=0.7:
@@ -287,8 +302,8 @@ class Target:
         #radius at observ. uncertainty:
         #plot(.5*sin(a),.5*cos(a),'k:')
         #plot((0,),(0,),'k+')
-        text(-.05,.5,'${Bias}/{IQR}_{ref}$',fontsize=16,transform=ax.transAxes,rotation=90,verticalalignment='center',horizontalalignment='center')
-        text(.5,-.05,"${sign}({IQR}-{IQR}_{ref})*{MAE'}/{IQR}_{ref}$",fontsize=16,transform=ax.transAxes,verticalalignment='center',horizontalalignment='center')
+        self.ax.text(-.05,.5,'${Bias}/{IQR}_{ref}$',fontsize=16,transform=self.ax.transAxes,rotation=90,verticalalignment='center',horizontalalignment='center')
+        self.ax.text(.5,-.05,"${sign}({IQR}-{IQR}_{ref})*{MAE'}/{IQR}_{ref}$",fontsize=16,transform=self.ax.transAxes,verticalalignment='center',horizontalalignment='center')
 
 
 class TargetDiagram(Target,Stats):
@@ -304,9 +319,11 @@ class TargetDiagram(Target,Stats):
           E(float): the scale difference of the two dataset
           csv(string): collects the summary statistics of the instance to be
             written to csv file, when desired.
+          ax (matplotlib.axes.Axes): axes containing the diagram.
     """
 
-    def __init__(self,gam,E0,E,rho,marker='o',s=40,antiCorrelation=False,*opts,**keys):
+    def __init__(self,gam,E0,E,rho,marker='o',s=40,antiCorrelation=False,
+        ax=False,*opts,**keys):
 
         """Initialises the class given the pre-calculated metrics and draws
         the diagram grid with the first point.
@@ -320,11 +337,16 @@ class TargetDiagram(Target,Stats):
                 filled with colour code for bias.
             s (integer scalar or array_like): marker size in points
             antiCorrelation (boolean): if True, show negative correlations
+            ax (matplotlib.axes.Axes): axes to use, if False creates new Axes
             opts: positional arguments passed to ``add`` function
             keys: keyword arguments passed to ``add`` function
         """
 
         Stats.__init__(self,gam,E0,E,rho)
+        if ax:
+            self.ax=ax
+        else:
+            self.ax=figure().add_subplot(111)
         self.drawTargetGrid()
         if antiCorrelation:
           self._cmin=-1.
@@ -332,8 +354,8 @@ class TargetDiagram(Target,Stats):
           self._cmin=0.
         self._cmax=1.
         self._lpos=[]
-        self.add(self.gamma,self.E0,self.E,self.R,marker=marker,s=s,*opts,**keys)
-        self.cbar=colorbar()
+        mpl=self.add(self.gamma,self.E0,self.E,self.R,marker=marker,s=s,*opts,**keys)
+        self.cbar=colorbar(mpl,ax=self.ax)
         self.cbar.set_label('Correlation Coefficient')
 
     def __call__(self,gam,E0,E,rho,marker='o',s=40,*opts,**keys):
@@ -352,7 +374,7 @@ class TargetDiagram(Target,Stats):
         """
 
         Stats.__call__(self,gam,E0,E,rho)
-        self.add(self.gamma,self.E0,self.E,self.R,marker=marker,s=s,*opts,**keys)
+        mpl=self.add(self.gamma,self.E0,self.E,self.R,marker=marker,s=s,*opts,**keys)
 
     def add(self,gam,E0,E,R,marker='o',s=40,*opts,**keys):
 
@@ -368,16 +390,20 @@ class TargetDiagram(Target,Stats):
             s (integer scalar or array_like): marker size in points
             opts: positional arguments passed to ``add`` function
             keys: keyword arguments passed to ``add`` function
+
+        Returns:
+            matplotlib.collections.PathCollection instance from scatter call
         """
 
         sig= gam>1 and 1 or -1
-        scatter(atleast_1d(sig*E),atleast_1d(E0),c=atleast_1d(R),
+        mpl=self.ax.scatter(atleast_1d(sig*E),atleast_1d(E0),c=atleast_1d(R),
             vmin=self._cmin,vmax=self._cmax,marker=marker,s=s,*opts,**keys)
         self._lpos.append((sig*E,E0))
-        rmax=max(abs(array(axis('scaled'))).max(),1.5)
-        plot((0,0),(-rmax,rmax),'k-')
-        plot((rmax,-rmax),(0,0),'k-')
-        axis(xmin=-rmax,xmax=rmax,ymax=rmax,ymin=-rmax)
+        rmax=max(abs(array(self.ax.axis('scaled'))).max(),1.5)
+        self.ax.plot((0,0),(-rmax,rmax),'k-')
+        self.ax.plot((rmax,-rmax),(0,0),'k-')
+        self.ax.axis(xmin=-rmax,xmax=rmax,ymax=rmax,ymin=-rmax)
+        return mpl
 
     def labels(self,lstr,*opts,**keys):
 
@@ -393,7 +419,7 @@ class TargetDiagram(Target,Stats):
 
         rmax=max(abs(array(axis())).max(),1.5)
         for n,p in enumerate(self._lpos):
-            text(p[0]+.025*rmax,p[1]+.025*rmax,lstr[n],*opts,**keys)
+            self.ax.text(p[0]+.025*rmax,p[1]+.025*rmax,lstr[n],*opts,**keys)
 
 class TargetStatistics(StatsDiagram,TargetDiagram):
 
@@ -409,9 +435,11 @@ class TargetStatistics(StatsDiagram,TargetDiagram):
           csv(string): collects the summary statistics of the instance to be
             written to csv file, when desired.
           cbar(matplotlib.colors.colorbar): colorbar of target plot
+          ax (matplotlib.axes.Axes): axes containing the diagram.
     """
 
-    def __init__(self,data,refdata,precision,marker='o',s=40,antiCorrelation=False,*opts,**keys):
+    def __init__(self,data,refdata,precision,marker='o',s=40,
+        antiCorrelation=False,ax=False,*opts,**keys):
 
         """Calls summary statistics function from input data with respect to
         reference data. Initialises csv attribute. In the robust case a
@@ -428,11 +456,17 @@ class TargetStatistics(StatsDiagram,TargetDiagram):
                 filled with colour code for bias.
             s (integer scalar or array_like): marker size in points
             antiCorrelation (boolean): if True, show negative correlations
+            ax (matplotlib.axes.Axes): axes to use, if False creates new Axes
             *opts: positional arguments passed to summary statistics function
             **keys: keyword arguments passed to summary statistics function
         """
 
-        StatsDiagram.__init__(self,data,refdata,precision,*opts,**keys)
+        StatsDiagram.__init__(self,data,refdata,precision)
+        if ax:
+            self.ax=ax
+        else:
+            self.ax=figure().add_subplot(111)
+        f=ax.get_figure()
         self.drawTargetGrid()
         if antiCorrelation:
           self._cmin=-1.
@@ -440,8 +474,8 @@ class TargetStatistics(StatsDiagram,TargetDiagram):
           self._cmin=0.
         self._cmax=1.
         self._lpos=[]
-        self.add(self.gamma,self.E0,self.E,self.R,marker=marker,s=s,*opts,**keys)
-        self.cbar=colorbar()
+        mpl=self.add(self.gamma,self.E0,self.E,self.R,marker=marker,s=s,*opts,**keys)
+        self.cbar=f.colorbar(mpl,ax=self.ax)
         self.cbar.set_label('Correlation Coefficient')
 
     def __call__(self,data,refdata,precision,marker='o',s=40,*opts,**keys):
@@ -459,7 +493,7 @@ class TargetStatistics(StatsDiagram,TargetDiagram):
             **keys: keyword arguments passed to summary statistics function
         """
 
-        StatsDiagram.__call__(self,data,refdata,precision,*opts,**keys)
+        StatsDiagram.__call__(self,data,refdata,precision)
         self.add(self.gamma,self.E0,self.E,self.R,marker=marker,s=s,*opts,**keys)
 
     def add(self,gam,E0,E,R,marker='o',s=40,*opts,**keys):
@@ -476,14 +510,18 @@ class TargetStatistics(StatsDiagram,TargetDiagram):
             s (integer scalar or array_like): marker size in points
             opts: positional arguments passed to ``add`` function
             keys: keyword arguments passed to ``add`` function
+
+        Returns:
+            matplotlib.collections.PathCollection instance from scatter call
         """
 
         sig= gam>1 and 1 or -1
-        scatter(atleast_1d(sig*E),atleast_1d(E0),c=atleast_1d(R),
+        mpl=self.ax.scatter(atleast_1d(sig*E),atleast_1d(E0),c=atleast_1d(R),
             vmin=self._cmin,vmax=self._cmax,marker=marker,s=s,*opts,**keys)
         self._lpos.append((sig*E,E0))
-        rmax=max(abs(array(axis('scaled'))).max(),1.5)
-        axis(xmin=-rmax,xmax=rmax,ymax=rmax,ymin=-rmax)
+        rmax=max(abs(array(self.ax.axis('scaled'))).max(),1.5)
+        self.ax.axis(xmin=-rmax,xmax=rmax,ymax=rmax,ymin=-rmax)
+        return mpl
 
     def labels(self,lstr,*opts,**keys):
 
@@ -497,6 +535,6 @@ class TargetStatistics(StatsDiagram,TargetDiagram):
                 function.
         """
 
-        rmax=max(abs(array(axis())).max(),1.5)
+        rmax=max(abs(array(self.ax.axis())).max(),1.5)
         for n,p in enumerate(self._lpos):
-            text(p[0]+.025*rmax,p[1]+.025*rmax,lstr[n],*opts,**keys)
+            self.ax.text(p[0]+.025*rmax,p[1]+.025*rmax,lstr[n],*opts,**keys)

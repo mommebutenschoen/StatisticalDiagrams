@@ -18,19 +18,20 @@ equivalent.
 
   from StatisticalDiagrams import *
   from numpy.random import randn
-  from matplotlib.pyplot import figure,show
+  from matplotlib.pyplot import figure
 
   ref=randn(10)
   a=randn(10)
   b=.5*(.25*ref+.75*randn(10)) - .5
   c=2.*(.75*ref+.25*randn(10)) + .5
 
-  figure()
-  TarS=TargetStatistics(a,ref)
+  f=figure(figsize=[12,10])
+  ax1=f.add_subplot(221)
+  TarS=TargetStatistics(a,ref,ax=ax1)
   TarS(b,ref)
   TarS(c,ref)
-  figure()
-  TayS=TaylorStatistics(a,ref)
+  ax2=f.add_subplot(222)
+  TayS=TaylorStatistics(a,ref,ax=ax2)
   TayS(b,ref)
   TayS(c,ref)
 
@@ -48,12 +49,12 @@ equivalent.
   E3=(c.mean()-ref.mean())/refstd
   G3=std3/refstd
 
-  figure()
-  TarD=TargetDiagram(G1,E1,R1,)
+  ax3=f.add_subplot(223)
+  TarD=TargetDiagram(G1,E1,R1,ax=ax3)
   TarD(G2,E2,R2,)
   TarD(G3,E3,R3,)
-  figure()
-  TayD=TaylorDiagram(G1,E1,R1,)
+  ax4=f.add_subplot(224)
+  TayD=TaylorDiagram(G1,E1,R1,ax=ax4)
   TayD(G2,E2,R2,)
   TayD(G3,E3,R3,)
 
@@ -63,7 +64,7 @@ equivalent.
 from __future__ import print_function
 from numpy import sqrt,arange,sin,cos,pi,abs,arccos,array,atleast_1d
 from scipy.stats import pearsonr
-from matplotlib.pyplot import plot,axis,scatter,xlabel,ylabel,clabel,colorbar,text,subplot
+from matplotlib.pyplot import figure
 
 def rmsds(gamma,R):
     return sqrt(1.+gamma**2-2.*gamma*R)
@@ -236,28 +237,54 @@ class Stats:
 
 class Target:
 
-    """Base class providing a function to draw the grid for Target Diagrams."""
+    """Base class providing a function to draw the grid for Target Diagrams.
 
-    def drawTargetGrid(self):
+    Args:
+        ax (matplotlib.axes.Axes): axes containing the diagram.
+    """
+
+    def __init__(self,ax):
+
+        """
+        Args:
+            ax (matplotlib.axes.Axes): axes to use, if False creates new Axes
+        """
+
+        self.ax=ax
+
+    def drawTargetGrid(self,):
 
         """Draws Target Diagram grid."""
 
         a=arange(0,2.01*pi,.02*pi)
-        plot(sin(a),cos(a),'k')
+        self.ax.plot(sin(a),cos(a),'k')
         #radius at minimum RMSD' given R:
         #  Mr=sqrt(1+R^2-2R^2)
         #for R=0.7:
-        plot(.71414284285428498*sin(a),.71414284285428498*cos(a),'k--')
+        self.ax.plot(.71414284285428498*sin(a),.71414284285428498*cos(a),'k--')
         #radius at observ. uncertainty:
         #plot(.5*sin(a),.5*cos(a),'k:')
-        plot((0,),(0,),'k+')
-        ylabel('${Bias}/\sigma_{ref}$',fontsize=16)
-        xlabel('${sign}(\sigma-\sigma_{ref})*{RMSD}\'/\sigma_{ref}$',fontsize=16)
+        self.ax.plot((0,),(0,),'k+')
+        self.ax.set_ylabel('${Bias}/\sigma_{ref}$',fontsize=16)
+        self.ax.set_xlabel('${sign}(\sigma-\sigma_{ref})*{RMSD}\'/\sigma_{ref}$',fontsize=16)
 
 class Taylor:
 
     """Base class providing a function to draw the grid for Taylor Diagrams for
-    inheritance along with stats class."""
+    inheritance along with stats class.
+
+    Args:
+            ax (matplotlib.axes.Axes): axes containing the diagram.
+    """
+
+    def __init__(self,ax):
+
+        """
+        Args:
+            ax (matplotlib.axes.Axes): axes to use, if False creates new Axes
+        """
+
+        self.ax=ax
 
     def drawTaylorGrid(self,R,dr,antiCorrelation):
         """Draws Taylor Diagram grid.
@@ -272,28 +299,28 @@ class Taylor:
           a0=-1.
         else:
           a0=0.
-	#Draw circles:
+	    #Draw circles:
         a=arange(a0,1.01,.05)*.5*pi
-        self.ax=plot(sin(a),cos(a),'k-')
-        plot(.5*sin(a),.5*cos(a),'k:')
+        self.ax.plot(sin(a),cos(a),'k-')
+        self.ax.plot(.5*sin(a),.5*cos(a),'k:')
         n=R/.5
         for m in arange(3,n+1):
-            plot(m*.5*sin(a),m*.5*cos(a),'k:')
+            self.ax.plot(m*.5*sin(a),m*.5*cos(a),'k:')
         #Draw rays for correlations at .99,.75,.5,.25 steps:
         rays=list(arange(a0,1.05,.25))
         rays.append(.99)
         if a0==-1.: rays.append(-.99)
         for rho in rays:
-            plot((R*rho,0),(R*sin(arccos(rho)),0),'k:')
-        d = rho>=0. and 1.02 or 1.25
-        text(d*R*rho,1.01*R*sin(arccos(rho)),str(rho),fontsize=8)
-        text(1.01*R*sin(pi*.25),1.02*R*cos(pi*.25),r'$\rho$',rotation=-45,fontsize=16)
+            self.ax.plot((R*rho,0),(R*sin(arccos(rho)),0),'k:')
+            d = rho>=0. and 1.02 or 1.25
+            self.ax.text(d*R*rho,1.01*R*sin(arccos(rho)),str(rho),fontsize=8)
+            self.ax.text(1.01*R*sin(pi*.25),1.02*R*cos(pi*.25),r'$\rho$',rotation=-45,fontsize=16)
         #text(0.,1.02*R*cos(0.),'0')
         #text(1.03*R*sin(.5*pi),0.,'1')
         goOn=True
         r=dr
         a=arange(-1.,1.01,.05)*.5*pi
-        plot((1,),(0,),'ko')
+        self.ax.plot((1,),(0,),'ko')
         while goOn:
             xx=[]
             yy=[]
@@ -310,12 +337,12 @@ class Taylor:
                  xx.append(x)
                  yy.append(y)
             if len(xx)>0:
-                plot(xx,yy,'k--')
+                self.ax.plot(xx,yy,'k--')
             else:
                 goOn=False
             r+=dr
-        xlabel('$\sigma/\sigma_{ref}$',fontsize=16)
-        ylabel('$\sigma/\sigma_{ref}$',fontsize=16)
+        self.ax.set_xlabel('$\sigma/\sigma_{ref}$',fontsize=16)
+        self.ax.set_ylabel('$\sigma/\sigma_{ref}$',fontsize=16)
 
 class TaylorDiagram(Taylor,Stats):
 
@@ -330,9 +357,11 @@ class TaylorDiagram(Taylor,Stats):
           E(float): the root-mean square difference of the two dataset
           csv(string): collects the summary statistics of the instance to be
             written to csv file, when desired.
+          ax (matplotlib.axes.Axes): axes containing the diagram.
     """
 
-    def __init__(self,gam,E0,rho,R=2.5,dr=.5,antiCorrelation=True,marker='o',s=40,*opts,**keys):
+    def __init__(self,gam,E0,rho,R=2.5,dr=.5,antiCorrelation=True,marker='o',
+        s=40,ax=False,*opts,**keys):
 
         """Initialises the class given the pre-calculated metrics and draws
         the diagram grid with the first point.
@@ -349,6 +378,7 @@ class TaylorDiagram(Taylor,Stats):
             marker: shape used to show points, should be a hollow shape as it is
                 filled with colour code for bias.
             s (integer scalar or array_like): marker size in points
+            ax (matplotlib.axes.Axes): axes to use, if False creates new Axes
             opts: positional arguments passed to ``add``
                 function
             keys: keyword arguments passed to ``add`` function
@@ -356,6 +386,11 @@ class TaylorDiagram(Taylor,Stats):
 
         Stats.__init__(self,gam,E0,rho)
         R=max(int(2.*self.gamma+1.)/2.,1.5)
+        if ax:
+            self.ax=ax
+        else:
+            self.ax=figure().add_subplot(111)
+        f=self.ax.get_figure()
         self.drawTaylorGrid(R,dr,antiCorrelation)
         self._cmax=max(1.,abs(self.E0))
         self._cmin=-self._cmax
@@ -364,8 +399,8 @@ class TaylorDiagram(Taylor,Stats):
             self._axis={'xmin':-1.3*R,'xmax':1.3*R,'ymin':-.1*R,'ymax':1.1*R}
         else:
             self._axis={'xmin':-.1*R,'xmax':1.3*R,'ymin':-.1*R,'ymax':1.1*R}
-        self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
-        self.cbar=colorbar()
+        mpl=self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
+        self.cbar=f.colorbar(mpl,ax=self.ax)
         self.cbar.set_label('${Bias}/\sigma_{ref}$')
 
     def __call__(self,gam,E0,rho,marker='o',s=40,*opts,**keys):
@@ -386,7 +421,8 @@ class TaylorDiagram(Taylor,Stats):
         Stats.__call__(self,gam,E0,rho,*opts,**keys)
         self._cmax=max(abs(self.E0),self._cmax)
         self._cmin=-self._cmax
-        self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
+        mpl=self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
+        self.cbar.set_clim(self._cmin,self._cmax)
 
     def add(self,gam,E0,R,marker='o',s=40,*opts,**keys):
 
@@ -403,13 +439,18 @@ class TaylorDiagram(Taylor,Stats):
             opts: positional arguments passed to matplotlib.pyplot.scatter
                 function
             keys: keyword arguments passed to ``matplotlib.pyplot.scatter`` function
+        Returns:
+            matplotlib.collections.PathCollection instance from scatter call
         """
 
         E=rmsds(gam,R)
-        scatter(atleast_1d(gam*R),atleast_1d(gam*sin(arccos(R))),c=atleast_1d(E0),
-            vmin=self._cmin,vmax=self._cmax,marker=marker,s=s,*opts,**keys)
-        self._lpos.append((gam*R,gam*sin(arccos(R))))
-        axis(**self._axis)
+        self._lpos.append((gam*R,gam*sin(arccos(R)),E0))
+        #replot previous values with fixed colourscale:
+        for p in self._lpos:
+            mpl=self.ax.scatter(atleast_1d(p[0]),atleast_1d(p[1]),c=atleast_1d(p[2]),
+                vmin=self._cmin,vmax=self._cmax,marker=marker,s=s,*opts,**keys)
+        self.ax.axis(**self._axis)
+        return mpl
 
     def labels(self,lstr,*opts,**keys):
 
@@ -421,12 +462,12 @@ class TaylorDiagram(Taylor,Stats):
                 function.
             **keys: keyword arguments passed to ``matplotlib.pyplot.text``
                 function.
-
         """
-        yrange=axis()[2:]
+
+        yrange=self.ax.axis()[2:]
         rmax=max(abs(yrange[1]-yrange[0]),1.5)
         for n,p in enumerate(self._lpos):
-           text(p[0]+.025*rmax,p[1]+.025*rmax,lstr[n],*opts,**keys)
+           self.ax.text(p[0]+.025*rmax,p[1]+.025*rmax,lstr[n],*opts,**keys)
 
 class TargetDiagram(Target,Stats):
 
@@ -441,9 +482,11 @@ class TargetDiagram(Target,Stats):
           E(float): the root-mean square difference of the two dataset
           csv(string): collects the summary statistics of the instance to be
             written to csv file, when desired.
+          ax (matplotlib.axes.Axes): axes containing the diagram.
     """
 
-    def __init__(self,gam,E0,rho,marker='o',s=40,antiCorrelation=False,*opts,**keys):
+    def __init__(self,gam,E0,rho,marker='o',s=40,antiCorrelation=False,ax=False,
+        *opts,**keys):
 
         """Initialises the class given the pre-calculated metrics and draws
         the diagram grid with the first point.
@@ -457,11 +500,17 @@ class TargetDiagram(Target,Stats):
                 filled with colour code for bias.
             s (integer scalar or array_like): marker size in points
             antiCorrelation (boolean): if True, show negative correlations
+            ax (matplotlib.axes.Axes): axes to use, if False creates new Axes
             opts: positional arguments passed to ``add`` function
             keys: keyword arguments passed to ``add`` function
         """
 
         Stats.__init__(self,gam,E0,rho)
+        if ax:
+            self.ax=ax
+        else:
+            self.ax=figure().add_subplot(111)
+        f=self.ax.get_figure()
         self.drawTargetGrid()
         if antiCorrelation:
           self._cmin=-1.
@@ -469,9 +518,10 @@ class TargetDiagram(Target,Stats):
           self._cmin=0.
         self._cmax=1.
         self._lpos=[]
-        self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
-        self.cbar=colorbar()
+        mpl=self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
+        self.cbar=f.colorbar(mpl,ax=self.ax)
         self.cbar.set_label('Correlation Coefficient')
+
     def __call__(self,gam,E0,rho,marker='o',s=40,*opts,**keys):
 
         """Adds points to the diagram adjusting the colour codes
@@ -488,7 +538,8 @@ class TargetDiagram(Target,Stats):
         """
 
         Stats.__call__(self,gam,E0,rho)
-        self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
+        mpl=self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
+
     def add(self,gam,E0,R,marker='o',s=40,*opts,**keys):
 
         """Function to add additional points to the diagram, usually invoked
@@ -503,17 +554,21 @@ class TargetDiagram(Target,Stats):
             opts: positional arguments passed to matplotlib.pyplot.scatter
                 function
             keys: keyword arguments passed to ``matplotlib.pyplot.scatter`` function
+
+        Returns:
+            matplotlib.collections.PathCollection instance from scatter call
         """
 
         sig= gam>1 and 1 or -1
         E=sqrt(1.+gam**2-2.*gam*R)
-        scatter(atleast_1d(sig*E),atleast_1d(E0),c=atleast_1d(R),
+        mpl=self.ax.scatter(atleast_1d(sig*E),atleast_1d(E0),c=atleast_1d(R),
             vmin=self._cmin,vmax=self._cmax,marker=marker,s=s,*opts,**keys)
-        self._lpos.append((sig*E,E0))
-        rmax=max(abs(array(axis('scaled'))).max(),1.5)
-        plot((0,0),(-rmax,rmax),'k-')
-        plot((rmax,-rmax),(0,0),'k-')
-        axis(xmin=-rmax,xmax=rmax,ymax=rmax,ymin=-rmax)
+        self._lpos.append((sig*E,E0,R))
+        rmax=max(abs(array(self.ax.axis('scaled'))).max(),1.5)
+        self.ax.plot((0,0),(-rmax,rmax),'k-')
+        self.ax.plot((rmax,-rmax),(0,0),'k-')
+        self.ax.axis(xmin=-rmax,xmax=rmax,ymax=rmax,ymin=-rmax)
+        return mpl
 
     def labels(self,lstr,*opts,**keys):
 
@@ -527,9 +582,9 @@ class TargetDiagram(Target,Stats):
                 function.
         """
 
-        rmax=max(abs(array(axis())).max(),1.5)
+        rmax=max(abs(array(self.ax.axis())).max(),1.5)
         for n,p in enumerate(self._lpos):
-           text(p[0]+.025*rmax,p[1]+.025*rmax,lstr[n],*opts,**keys)
+           self.ax.text(p[0]+.025*rmax,p[1]+.025*rmax,lstr[n],*opts,**keys)
 
 class TargetStatistics(StatsDiagram,TargetDiagram):
 
@@ -544,9 +599,11 @@ class TargetStatistics(StatsDiagram,TargetDiagram):
           E(float): the root-mean square difference of the two dataset
           csv(string): collects the summary statistics of the instance to be
             written to csv file, when desired.
+          ax (matplotlib.axes.Axes): axes containing the diagram.
     """
 
-    def __init__(self,data,refdata,marker='o',s=40,antiCorrelation=False,*opts,**keys):
+    def __init__(self,data,refdata,marker='o',s=40,antiCorrelation=False,
+        ax=False,*opts,**keys):
         """Initialises the class computing all necessary metrics and draws
         the diagram grid with the first point.
         Markers in the diagram are colour-coded using the mean bias.
@@ -558,10 +615,16 @@ class TargetStatistics(StatsDiagram,TargetDiagram):
                 filled with colour code for bias.
             s (integer scalar or array_like): marker size in points
             antiCorrelation (boolean): if True, show negative correlations
+            ax (matplotlib.axes.Axes): axes to use, if False creates new Axes
             opts: positional arguments passed to ``add`` function
             keys: keyword arguments passed to ``add`` function
         """
         StatsDiagram.__init__(self,data,refdata,*opts,**keys)
+        if ax:
+            self.ax=ax
+        else:
+            self.ax=figure().add_subplot(111)
+        f=self.ax.get_figure()
         self.drawTargetGrid()
         if antiCorrelation:
           self._cmin=-1.
@@ -569,8 +632,8 @@ class TargetStatistics(StatsDiagram,TargetDiagram):
           self._cmin=0.
         self._cmax=1.
         self._lpos=[]
-        self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
-        self.cbar=colorbar()
+        mpl=self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
+        self.cbar=f.colorbar(mpl,ax=self.ax)
         self.cbar.set_label('Correlation Coefficient')
 
     def __call__(self,data,refdata,marker='o',s=40,*opts,**keys):
@@ -587,7 +650,7 @@ class TargetStatistics(StatsDiagram,TargetDiagram):
             keys: keyword arguments passed to ``add`` function
         """
         StatsDiagram.__call__(self,data,refdata,*opts,**keys)
-        self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
+        mpl=self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
 
 class TaylorStatistics(StatsDiagram,TaylorDiagram):
 
@@ -602,9 +665,11 @@ class TaylorStatistics(StatsDiagram,TaylorDiagram):
           E(float): the root-mean square difference of the two dataset
           csv(string): collects the summary statistics of the instance to be
             written to csv file, when desired.
+          ax (matplotlib.axes.Axes): axes containing the diagram.
     """
 
-    def __init__(self,data,refdata,R=2.5,dr=.5,antiCorrelation=True,marker='o',s=40,*opts,**keys):
+    def __init__(self,data,refdata,R=2.5,dr=.5,antiCorrelation=True,marker='o',
+        s=40,ax=False,*opts,**keys):
         """Initialises the class computing all necessary metrics and draws
         the diagram grid with the first point.
         Markers in the diagram are colour-coded using the mean bias.
@@ -619,12 +684,18 @@ class TaylorStatistics(StatsDiagram,TaylorDiagram):
                 filled with colour code for bias.
             s (integer scalar or array_like): marker size in points
             antiCorrelation (boolean): if True, show negative correlations
+            ax (matplotlib.axes.Axes): axes to use, if False creates new Axes
             opts: positional arguments passed to ``add`` function
             keys: keyword arguments passed to ``add`` function
         """
 
         StatsDiagram.__init__(self,data,refdata,*opts,**keys)
         R=max(int(2.*self.gamma+1.)/2.,1.5)
+        if ax:
+            self.ax=ax
+        else:
+            self.ax=figure().add_subplot(111)
+        f=self.ax.get_figure()
         self.drawTaylorGrid(R,dr,antiCorrelation)
         self._cmax=max(1.,abs(self.E0))
         self._cmin=-self._cmax
@@ -633,14 +704,15 @@ class TaylorStatistics(StatsDiagram,TaylorDiagram):
             self._axis={'xmin':-1.3*R,'xmax':1.3*R,'ymin':-.1*R,'ymax':1.1*R}
         else:
             self._axis={'xmin':-.1*R,'xmax':1.3*R,'ymin':-.1*R,'ymax':1.1*R}
-        self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
-        self.cbar=colorbar()
+        mpl=self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
+        self.cbar=f.colorbar(mpl,ax=self.ax)
         self.cbar.set_label('${Bias}/\sigma_{ref}$')
 
     def __call__(self,data,refdata,marker='o',s=40,*opts,**keys):
 
         """Adds points to the diagram adjusting the colour codes.
 
+        Args:
             data(float array): input data
             refdata(float array): references data, same shape as input data
             marker: shape used to show points, should be a hollow shape as it is
@@ -653,4 +725,5 @@ class TaylorStatistics(StatsDiagram,TaylorDiagram):
         StatsDiagram.__call__(self,data,refdata,*opts,**keys)
         self._cmax=max(abs(self.E0),self._cmax)
         self._cmin=-self._cmax
-        self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
+        mpl=self.add(self.gamma,self.E0,self.R,marker=marker,s=s,*opts,**keys)
+        self.cbar.set_clim(self._cmin,self._cmax)
