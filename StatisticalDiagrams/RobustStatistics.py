@@ -14,27 +14,81 @@ except:
 _nearest = lambda x:int(round(s))
 
 def binomcoeff(n,k):
+
+    """Binomial coefficient.
+
+    Args:
+        n (integer): positive integer number
+        k (integer): positive integer number <= n
+
+    Returns:
+        Binomial coefficient (integer).
+    """
+
     _nearest(comb(n,k))
 
 def IQR(data):
+
+    """Inter-quartile range of input data.
+
+    Args:
+        data (float array-like): input data
+
+    Returns:
+        Inter-quartile range (float).
+    """
+
     q25,q75=mquantiles(data,prob=[.25,.75])
     return q75-q25
 
 def flatCompress(data):
+
+   """Flattened and compressed (removing masekd values) representation of input
+   data.
+
+   Args:
+      data (array-like): input data
+
+   Returns:
+      flattened and compressed version of input data.
+   """
+
    if any(getmaskarray(data)):
       return data.ravel().compressed()
    else:
       return getdata(data).ravel()
 
 def flatCompressSamples(s1,s2):
+
+   """Flattened and compressed representation of two datasets using the combined
+   mask of the two (by disjunction).
+
+   Args:
+      s1 (array-like): first input dataset
+      s2 (array-like): second input dataset, same shape as first
+
+   Returns:
+      Flattened and compressed representation of input datasets.
+   """
+
    Mask=logical_or(getmaskarray(s1),getmaskarray(s2))
    s1=masked_where(Mask,s1).ravel().compressed()
    s2=masked_where(Mask,s2).ravel().compressed()
    return s1,s2
 
 def MIDExplicit(data):
-    """Median Interpoint Difference:
-        MID=med|xi-xj|,i<j"""
+
+    """Median Interpoint Difference::
+
+        MID=med|xi-xj|,i<j
+
+    Args:
+        data (float or integer array-like): input data
+
+    Returns:
+        Median interpoint distance.
+    """
+
     d=[]
     for n,x in enumerate(data.ravel()):
         for y in data.ravel()[n:]:
@@ -45,8 +99,11 @@ def MIDExplicit(data):
     return d[k]
 
 def Sn(data):
-    """ Robust Scale measure:
-    Sn = 1.1926 lowmed(i=1,n)( highmed(j=1,n)(|xi - xj|) )
+
+    """Robust Scale measure::
+
+       Sn = 1.1926 lowmed(i=1,n)( highmed(j=1,n)(|xi - xj|) )
+
     Optimised Version
     See:
     Rousseeuw, P. J. & Croux
@@ -56,7 +113,15 @@ def Sn(data):
     Croux, C. & Rousseeuw, P. J.
     Time-efficient algorithms for two highly robust estimators of scale
     Computational Statistics
-    1992, 1 """
+    1992, 1
+
+    Args:
+        data (float array-like): input data
+
+    Returns:
+        Sn
+    """
+
     y=data.flatten()
     if y.shape[0]<2:
         if y.shape[0]==1:
@@ -154,11 +219,14 @@ def Sn(data):
         elif n==9: cn=1.131
     elif n%2==1:cn=n/(n-.9)
     else: cn=1.
-    return cn*1.1926*orderStatistic(a2,nlm,n)
+    return cn*1.1926*_orderStatistic(a2,nlm,n)
 
 def SnExplicit(data,c=1.1926):
-   """ Robust Scale measure:
-   Sn = 1.1926 med(i=1,n)( med(j=1,n)(|xi - xj|) )
+
+   """ Robust Scale measure::
+
+      Sn = 1.1926 med(i=1,n)( med(j=1,n)(|xi - xj|) )
+
    In this version the mathematical definition was directly translated
    into code. This is highly inefficient (time and memory) and should only
    be used for checks.
@@ -170,7 +238,13 @@ def SnExplicit(data,c=1.1926):
    Croux, C. & Rousseeuw, P. J.
    Time-efficient algorithms for two highly robust estimators of scale
    Computational Statistics
-   1992, 1 """
+   1992, 1
+   Args:
+        data (float array-like): input data
+
+   Returns:
+        Sn
+   """
    data=flatCompress(data)
    if data.shape[0]<2:
         if data.shape[0]==1:
@@ -181,7 +255,7 @@ def SnExplicit(data,c=1.1926):
    dd=empty(data.shape)
    nsize=data.shape[0]
    for n,d in enumerate(data):
-      dists[n]=orderStatistic(abs(d-data),nsize//2+1,nsize)
+      dists[n]=_orderStatistic(abs(d-data),nsize//2+1,nsize)
    if nsize<10:
         if nsize==2: cn=.743
         elif nsize==3: cn=1.851
@@ -194,10 +268,20 @@ def SnExplicit(data,c=1.1926):
    else:
         if nsize%2==1:cn=nsize/(nsize-.9)
         else: cn=1.
-   return cn*c*orderStatistic(dists,(nsize+1)//2,nsize)
+   return cn*c*_orderStatistic(dists,(nsize+1)//2,nsize)
 
 def Sdist(s1,s2,distFun):
-   """Computes distance scale between to sets of samples based on Sn scale."""
+
+   """Computes distance scale between to sets of samples based on Sn metric.
+
+   Args:
+      s1, s2 (float array-likes): input datasets, same shape.
+      distFun: distance function to be used
+
+   Returns:
+      Median distance based on
+   """
+
    dists1=empty(s1.shape)
    for n,d1 in enumerate(s1):
        dists2=empty(s2.shape)
@@ -207,6 +291,7 @@ def Sdist(s1,s2,distFun):
    return median(dists1)
 
 def MID(data):
+
     """ Median interpoint distance, merory efficient version
     adopted from:
     Rousseeuw, P. J. & Croux
@@ -216,7 +301,15 @@ def MID(data):
     Croux, C. & Rousseeuw, P. J.
     Time-efficient algorithms for two highly robust estimators of scale
     Computational Statistics
-    1992, 1"""
+    1992, 1
+
+    Args:
+       data (float array-like): input data
+
+    Returns:
+        Median interpoint distance (float).
+    """
+
     y=data.flatten()
     if y.shape[0]<2:
         if y.shape[0]==1:
@@ -277,7 +370,7 @@ def MID(data):
                 for jj in arange(l,r+1):
                     work[j]=yy-y[n-jj]
                     j+=1
-        qn=orderStatistic(work,knew-nL,j)
+        qn=_orderStatistic(work,knew-nL,j)
     if n<10:
         if n==2: dn=.399
         elif n==3: dn=.994
@@ -293,22 +386,34 @@ def MID(data):
     return dn*qn
 
 def QnExplicit(data,c=2.2219):
-   """ Robust Scale measure:
-   Qn = c*dn*{|xi-xj|;i<j}_(k), i.e.
-   the kth order statistic of the ( n over 2 ) interpoint distances.
-   k=(n/2+1 over 2)
+
+   """Robust Scale measure::
+
+      Qn = c*dn*{|xi-xj|;i<j}_(k), i.e.
+
+   the kth order statistic of the ``( n over 2 )`` interpoint distances
+   ``k=(n/2+1 over 2)``.
    In this version the mathematical definition was directly translated
    into code. This is highly inefficient (time and memory) and should only
    be used for checks.
    See:
-   Rousseeuw, P. J. & Croux
-   C. Alternatives to the Median Absolute Deviation
-   Journal of the American Statistical Association
-   1993, 88, 1273-1283
-   Croux, C. & Rousseeuw, P. J.
-   Time-efficient algorithms for two highly robust estimators of scale
-   Computational Statistics
-   1992, 1"""
+
+      Rousseeuw, P. J. & Croux
+      C. Alternatives to the Median Absolute Deviation
+      Journal of the American Statistical Association
+      1993, 88, 1273-1283
+      Croux, C. & Rousseeuw, P. J.
+      Time-efficient algorithms for two highly robust estimators of scale
+      Computational Statistics
+      1992, 1
+
+   Args:
+      data (float array-like): input data
+      c (float): scaling multiplyer (see background paper)
+   Returns:
+      Qn (float).
+   """
+
    data=flatCompress(data)
    if data.shape[0]<2:
         if data.shape[0]==1:
@@ -335,12 +440,14 @@ def QnExplicit(data,c=2.2219):
          dists[k]=abs(d1-d2)
          k+=1
    kord=binomcoeff(n/2+1,2)
-   return c*dn*orderStatistic(dists,kord,k)
+   return c*dn*_orderStatistic(dists,kord,k)
 
 def Qn(data):
-    """ Robust Scale measure:
-    Qn = c*dn*{|xi-xj|;i<j}_(k), i.e.
-    the kth order statistic of the ( n over 2 ) interpoint distances.
+
+    """ Robust Scale measure::
+
+       Qn = c*dn*{|xi-xj|;i<j}_(k)
+    i.e. the kth order statistic of the ( n over 2 ) interpoint distances.
     k=(n/2+1 over 2)
     Optimised Version.
     See:
@@ -351,7 +458,15 @@ def Qn(data):
     Croux, C. & Rousseeuw, P. J.
     Time-efficient algorithms for two highly robust estimators of scale
     Computational Statistics
-    1992, 1"""
+    1992, 1
+
+   Args:
+      data (float array-like): input data
+      c (float): scaling multiplyer (see background paper)
+   Returns:
+      Qn (float).
+   """
+
     y=data.flatten()
     if y.shape[0]<2:
         if y.shape[0]==1:
@@ -412,7 +527,7 @@ def Qn(data):
                 for jj in arange(l,r+1):
                     work[j]=yy-y[n-jj]
                     j+=1
-        qn=orderStatistic(work,knew-nL,j)
+        qn=_orderStatistic(work,knew-nL,j)
     if n<10:
         if n==2: dn=.399
         elif n==3: dn=.994
@@ -428,7 +543,17 @@ def Qn(data):
     return dn*2.2219*qn
 
 def Qdist(s1,s2,distFun):
-   """Computes distance scale between to sets of samples based on Sn scale."""
+
+   """Computes distance scale between to sets of samples based on Sn scale.
+
+     Args:
+        s1, s2 (float array-likes): input datasets, same shape.
+        distFun: distance function to be used
+
+     Returns:
+        Median distance based on
+    """
+
    dists=empty(s1.shape[0]*s2,shape[0])
    k=0
    for d1 in s1:
@@ -439,30 +564,71 @@ def Qdist(s1,s2,distFun):
 
 
 def MAD(data,c=1.4826):
-   """Computes Median Absolute Deviation:
-       MAD=c*med|xi-med(xi)|"""
+
+   """Computes Median Absolute Deviation::
+
+         MAD=c*med|xi-med(xi)|
+
+    Args:
+        data (float array-like): input data
+        c (float): scaling coefficient
+
+    Returns:
+        Median absolute deviation (float).
+
+    """
+
    data=flatCompress(data)
    return c*median(abs(data-median(data)))
 
 def MAE(x,y):
-   """Computes Median Absolute Error:
-       MAE=med|xi-yi||"""
+
+   """Computes Median Absolute Error::
+
+         MAE=med|xi-yi||
+
+   Args:
+      xi,yi (float array-like): datasets to compare, same shape
+
+   Returns:
+      Median Absolute Error (float).
+   """
+
    x,y=flatCompressSamples(x,y)
    return median(abs(x-y))
 
 def MedianBias(x,y):
-   """Computes Median Bias:
-       MB=med|xi|-med|yi||"""
+
+   """Computes Median Bias::
+
+      MB=med|xi|-med|yi||
+
+   Args:
+      x,y (float array-like): datasets to compare, same shape
+
+   Returns:
+      Median bias (float).
+   """
    x,y=flatCompressSamples(x,y)
    return median(x)-median(y)
 
 def unbiasedMAE(x,y):
-   """Computes unbiased Median Absolute Error:
-       uMAE=med|xi-yi-med(xi)+med(yi)||"""
+
+   """Computes unbiased Median Absolute Error::
+
+       uMAE=med|xi-yi-med(xi)+med(yi)||
+
+   Args:
+      x,y (float array-like): datasets to compare, same shape
+
+   Returns:
+      Median bias (float).
+   """
+
    x,y=flatCompressSamples(x,y)
    return median(abs(x-y-median(x)+median(y)))
 
-def orderStatistic(data,nq,n):
+def _orderStatistic(data,nq,n):
     x=data.ravel()[:n]
     x.sort()
     return x[nq-1]
@@ -474,7 +640,7 @@ def _whimed(a,iw):
     wtotal=iw.sum()
     wrest=0
     while True:
-      trial=orderStatistic(a,nn//2+1,nn)
+      trial=_orderStatistic(a,nn//2+1,nn)
       wleft=0
       wmid=0
       wright=0

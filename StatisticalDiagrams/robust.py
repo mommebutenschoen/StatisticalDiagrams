@@ -85,11 +85,11 @@ class StatsDiagram:
     Attributes:
           scale (float): scale of reference data
           E0 (float): the median bias of the two data sets, relative to scale
-          gama(float): the ratio of the scales of data over reference data
-          R(float): Spearman correlation
-          p(float): the Spearman correlation with p-value
-          E(float): the scale difference of the two dataset
-          csv(string): collects the summary statistics of the instance to be
+          gama (float): the ratio of the scales of data over reference data
+          R (float): Spearman correlation
+          p (float): the Spearman correlation with p-value
+          E (float): the scale difference of the two dataset
+          csv (string): collects the summary statistics of the instance to be
             written to csv file, when desired.
     """
 
@@ -103,9 +103,9 @@ class StatsDiagram:
         and the scale measure of the reference is replaced by the precision.
 
         Args:
-            data(float array): input data
-            refdata(float array): references data, same shape as input data
-            precision(float arrya): reference data precision
+            data (float array): input data
+            refdata (float array): references data, same shape as input data
+            precision (float arrya): reference data precision
             *opts: positional arguments passed to summary statistics function
             **keys: keyword arguments passed to summary statistics function
         """
@@ -118,9 +118,9 @@ class StatsDiagram:
         """Recomputes summary statistics for new input and reference data.
 
         Args:
-            data(float array): input data
-            refdata(float array): references data, same shape as input data
-            precision(float arrya): reference data precision
+            data (float array): input data
+            refdata (float array): references data, same shape as input data
+            precision (float arrya): reference data precision
             *opts: positional arguments passed to summary statistics function
             **keys: keyword arguments passed to summary statistics function
         """
@@ -134,9 +134,9 @@ class StatsDiagram:
         them to the csv attribute and prints the summary statistics to stdout.
 
         Args:
-            data(float array): input data
-            refdata(float array): references data, same shape as input data
-            precision(float arrya): reference data precision
+            data (float array): input data
+            refdata (float array): references data, same shape as input data
+            precision (float arrya): reference data precision
             *opts: positional arguments passed to summary statistics function
             **keys: keyword arguments passed to summary statistics function
         """
@@ -313,10 +313,10 @@ class TargetDiagram(Target,Stats):
           scale (float): scale of reference data
           E0 (float): the median bias of the two data sets, relative to scale
           gama(float): the ratio of the scales of data over reference data
-          R(float): Spearman correlation
-          p(float): the Spearman correlation with p-value
-          E(float): the scale difference of the two dataset
-          csv(string): collects the summary statistics of the instance to be
+          R (float): Spearman correlation
+          p (float): the Spearman correlation with p-value
+          E (float): the scale difference of the two dataset
+          csv (string): collects the summary statistics of the instance to be
             written to csv file, when desired.
           ax (matplotlib.axes.Axes): axes containing the diagram.
     """
@@ -330,7 +330,8 @@ class TargetDiagram(Target,Stats):
 
         Args:
             gam (float): scale ratio (Data/Reference)
-            E0 (float): bias
+            E0 (float): bias, relative to scale
+            E (float): scale difference, relative to scale
             rho (float): correlation coefficient
             marker: shape used to show points, should be a hollow shape as it is
                 filled with colour code for bias.
@@ -364,7 +365,8 @@ class TargetDiagram(Target,Stats):
 
         Args:
             gam (float): scale ratio (Data/Reference)
-            E0 (float): bias
+            E0 (float): bias, relative to scale
+            E(float): scale difference, relative to scale
             rho (float): correlation coefficient
             marker: shape used to show points, should be a hollow shape as it is
                 filled with colour code for bias.
@@ -383,8 +385,9 @@ class TargetDiagram(Target,Stats):
 
         Args:
             gam (float): scale ratio (Data/Reference)
-            E0 (float): bias
-            rho (float): correlation coefficient
+            E0 (float): bias, relative to scale
+            E (float): scale difference, relative to scale
+            R (float): correlation coefficient
             marker: shape used to show points, should be a hollow shape as it is
                 filled with colour code for bias.
             s (integer scalar or array_like): marker size in points
@@ -429,12 +432,12 @@ class TargetStatistics(StatsDiagram,TargetDiagram):
           scale (float): scale of reference data
           E0 (float): the median bias of the two data sets, relative to scale
           gama(float): the ratio of the scales of data over reference data
-          R(float): Spearman correlation
-          p(float): the Spearman correlation with p-value
-          E(float): the scale difference of the two dataset
-          csv(string): collects the summary statistics of the instance to be
+          R (float): Spearman correlation
+          p (float): the Spearman correlation with p-value
+          E (float): the scale difference of the two dataset, relative to scale
+          csv (string): collects the summary statistics of the instance to be
             written to csv file, when desired.
-          cbar(matplotlib.colors.colorbar): colorbar of target plot
+          cbar (matplotlib.colors.colorbar): colorbar of target plot
           ax (matplotlib.axes.Axes): axes containing the diagram.
     """
 
@@ -449,9 +452,9 @@ class TargetStatistics(StatsDiagram,TargetDiagram):
         and the scale measure of the reference is replaced by the precision.
 
         Args:
-            data(float array): input data
-            refdata(float array): references data, same shape as input data
-            precision(float arrya): reference data precision
+            data (float array): input data
+            refdata (float array): references data, same shape as input data
+            precision (float arrya): reference data precision
             marker: shape used to show points, should be a hollow shape as it is
                 filled with colour code for bias.
             s (integer scalar or array_like): marker size in points
@@ -483,9 +486,9 @@ class TargetStatistics(StatsDiagram,TargetDiagram):
         """Adds points to the diagram adjusting the colour codes.
 
         Args:
-            data(float array): input data
-            refdata(float array): references data, same shape as input data
-            precision(float arrya): reference data precision
+            data (float array): input data
+            refdata (float array): references data, same shape as input data
+            precision (float arrya): reference data precision
             marker: shape used to show points, should be a hollow shape as it is
                 filled with colour code for bias.
             s (integer scalar or array_like): marker size in points
@@ -503,8 +506,9 @@ class TargetStatistics(StatsDiagram,TargetDiagram):
 
         Args:
             gam (float): scale ratio (Data/Reference)
-            E0 (float): bias
-            rho (float): correlation coefficient
+            E0 (float): bias relative to scale
+            E(float): scale difference, relative to scale
+            R (float): correlation coefficient
             marker: shape used to show points, should be a hollow shape as it is
                 filled with colour code for bias.
             s (integer scalar or array_like): marker size in points

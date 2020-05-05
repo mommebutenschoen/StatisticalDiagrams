@@ -18,7 +18,7 @@ equivalent.
 
   from StatisticalDiagrams import *
   from numpy.random import randn
-  from matplotlib.pyplot import figure
+  from matplotlib.pyplot import figure,show
 
   ref=randn(10)
   a=randn(10)
@@ -68,8 +68,8 @@ from matplotlib.pyplot import figure
 
 def rmsds(gamma,R):
 
-    """Computes normalised unbiased root-mean-square difference from correlation and
-    standard deviation ratio.
+    """Computes normalised unbiased root-mean-square difference from correlatio
+    and standard deviation ratio.
 
     Args:
         gamma (float): ratio of standard deviations
@@ -91,12 +91,13 @@ class StatsDiagram:
 
     Attributes:
           std (float): the standard deviation of the reference data
-          E0 (float): the mean bias of the two data sets
-          gama(float): the ratio of the std of data over reference data
-          R(float):
-          p(float): the Pearson correlation with p-value
-          E(float): the root-mean square difference of the two dataset
-          csv(string): collects the summary statistics of the instance to be
+          E0 (float): the mean normalised bias of the two data sets
+          gamma (float): the ratio of the std of data over reference data
+          R (float): Pearson correlation
+          p (float): p-value of Pearson correlation
+          E (float): the normalised root-mean square difference of the two
+            dataset
+          csv (string): collects the summary statistics of the instance to be
             written to csv file, when desired.
     """
 
@@ -106,8 +107,8 @@ class StatsDiagram:
         reference data. Initialises csv attribute.
 
         Args:
-            data(float array): input data
-            refdata(float array): references data, same shape as input data
+            data (float array): input data
+            refdata (float array): references data, same shape as input data
             *opts: positional arguments passed to summary statistics function
             **keys: keyword arguments passed to summary statistics function
         """
@@ -120,8 +121,8 @@ class StatsDiagram:
         """Recomputes summary statistics for new input and reference data.
 
         Args:
-            data(float array): input data
-            refdata(float array): references data, same shape as input data
+            data (float array): input data
+            refdata (float array): references data, same shape as input data
             *opts: positional arguments passed to summary statistics function
             **keys: keyword arguments passed to summary statistics function
         """
@@ -135,8 +136,8 @@ class StatsDiagram:
         them to the csv attribute and prints the summary statistics to stdout.
 
         Args:
-            data(float array): input data
-            refdata(float array): references data, same shape as input data
+            data (float array): input data
+            refdata (float array): references data, same shape as input data
             *opts: positional arguments passed to summary statistics function
             **keys: keyword arguments passed to summary statistics function
         """
@@ -192,7 +193,7 @@ class Stats:
 
         Args:
             gam (float): STD ratio (Data/Reference)
-            E0 (float): Mean bias
+            E0 (float): Normalised mean bias
             rho (float): Correlation Coefficient
         """
         self.E0=E0
@@ -362,11 +363,11 @@ class TaylorDiagram(Taylor,Stats):
 
     Attributes:
           std (float): the standard deviation of the reference data
-          E0 (float): the mean bias of the two data sets
+          E0 (float): normalised mean bias of the two data sets
           gama(float): the ratio of the std of data over reference data
           R(float): Pearson correlation
           p(float): p-value of Pearson correlation
-          E(float): the root-mean square difference of the two dataset
+          E(float): normalised root-mean square difference of the two dataset
           csv(string): collects the summary statistics of the instance to be
             written to csv file, when desired.
           ax (matplotlib.axes.Axes): axes containing the diagram.
@@ -381,7 +382,7 @@ class TaylorDiagram(Taylor,Stats):
 
         Args:
             gam (float): STD ratio (Data/Reference)
-            E0 (float): Mean bias
+            E0 (float): Normalised mean bias
             rho (float): Correlation Coefficient
             R (float): length of rays from origin in Taylor plot
             dr (float): step-size of circles around ideal point (1,0) in Taylor
@@ -421,7 +422,7 @@ class TaylorDiagram(Taylor,Stats):
 
         Args:
             gam (float): STD ratio (Data/Reference)
-            E0 (float): Mean bias
+            E0 (float): Normalised mean bias
             rho (float): Correlation Coefficient
             marker: shape used to show points, should be a hollow shape as it is
                 filled with colour code for bias.
@@ -443,7 +444,7 @@ class TaylorDiagram(Taylor,Stats):
 
         Args:
             gam (float): STD ratio (Data/Reference)
-            E0 (float): Mean bias
+            E0 (float): Normalised mean bias
             R (float): Correlation Coefficient
             marker: shape used to show points, should be a hollow shape as it is
                 filled with colour code for bias.
@@ -487,11 +488,11 @@ class TargetDiagram(Target,Stats):
 
     Attributes:
           std (float): the standard deviation of the reference data
-          E0 (float): the mean bias of the two data sets
+          E0 (float): normalised mean bias of the two data sets
           gama(float): the ratio of the std of data over reference data
           R(float): Pearson correlation
           p(float): p-value of Pearson correlation
-          E(float): the root-mean square difference of the two dataset
+          E(float): normalised root-mean square difference of the two dataset
           csv(string): collects the summary statistics of the instance to be
             written to csv file, when desired.
           ax (matplotlib.axes.Axes): axes containing the diagram.
@@ -506,7 +507,7 @@ class TargetDiagram(Target,Stats):
 
         Args:
             gam (float): STD ratio (Data/Reference)
-            E0 (float): Mean bias
+            E0 (float): normalised mean bias
             rho (float): Correlation Coefficient
             marker: shape used to show points, should be a hollow shape as it is
                 filled with colour code for bias.
@@ -540,7 +541,7 @@ class TargetDiagram(Target,Stats):
 
         Args:
             gam (float): STD ratio (Data/Reference)
-            E0 (float): Mean bias
+            E0 (float): normalised mean bias
             rho (float): Correlation Coefficient
             marker: shape used to show points, should be a hollow shape as it is
                 filled with colour code for bias.
@@ -559,7 +560,7 @@ class TargetDiagram(Target,Stats):
 
         Args:
             gam (float): STD ratio (Data/Reference)
-            E0 (float): Mean bias
+            E0 (float): normalised mean bias
             R (float): Correlation Coefficient
             marker: shape used to show points, should be a hollow shape as it is
                 filled with colour code for bias.
@@ -604,11 +605,11 @@ class TargetStatistics(StatsDiagram,TargetDiagram):
 
     Attributes:
           std (float): the standard deviation of the reference data
-          E0 (float): the mean bias of the two data sets
+          E0 (float): normalised mean bias of the two data sets
           gama(float): the ratio of the std of data over reference data
           R(float): Pearson correlation
           p(float): the Pearson correlation with p-value
-          E(float): the root-mean square difference of the two dataset
+          E(float): mormalised root-mean square difference of the two dataset
           csv(string): collects the summary statistics of the instance to be
             written to csv file, when desired.
           ax (matplotlib.axes.Axes): axes containing the diagram.
@@ -670,11 +671,11 @@ class TaylorStatistics(StatsDiagram,TaylorDiagram):
 
     Attributes:
           std (float): the standard deviation of the reference data
-          E0 (float): the mean bias of the two data sets
+          E0 (float): normalised mean bias of the two data sets
           gama(float): the ratio of the std of data over reference data
           R(float): Pearson correlation
           p(float): the Pearson correlation with p-value
-          E(float): the root-mean square difference of the two dataset
+          E(float):  normalised root-mean square difference of the two dataset
           csv(string): collects the summary statistics of the instance to be
             written to csv file, when desired.
           ax (matplotlib.axes.Axes): axes containing the diagram.
