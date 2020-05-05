@@ -37,7 +37,6 @@ that the outcome is equivalent.
   TD=TargetStatistics(a,ref,precision=1.e-15,ax=ax1)
   TD(b,ref,precision=1.e-15)
   TD(c,ref,precision=1.e-15)
-  show()
 
   R1,p=spearmanr(a,ref)
   scale1=IQR(a)
@@ -66,7 +65,7 @@ from __future__ import print_function
 import logging
 from numpy import sqrt,arange,sin,cos,pi,abs,arccos,array,median,atleast_1d
 from scipy.stats import spearmanr
-from matplotlib.pyplot import plot,axis,scatter,xlabel,ylabel,clabel,colorbar,text,subplot,tick_params,xticks,yticks
+from matplotlib.pyplot import figure
 from .RobustStatistics import MAE,Qn,unbiasedMAE,IQR,Sn,MID
 from matplotlib.ticker import MultipleLocator,NullFormatter
 
@@ -347,6 +346,7 @@ class TargetDiagram(Target,Stats):
             self.ax=ax
         else:
             self.ax=figure().add_subplot(111)
+        f=ax.get_figure()
         self.drawTargetGrid()
         if antiCorrelation:
           self._cmin=-1.
@@ -355,7 +355,7 @@ class TargetDiagram(Target,Stats):
         self._cmax=1.
         self._lpos=[]
         mpl=self.add(self.gamma,self.E0,self.E,self.R,marker=marker,s=s,*opts,**keys)
-        self.cbar=colorbar(mpl,ax=self.ax)
+        self.cbar=f.colorbar(mpl,ax=self.ax)
         self.cbar.set_label('Correlation Coefficient')
 
     def __call__(self,gam,E0,E,rho,marker='o',s=40,*opts,**keys):
@@ -520,6 +520,8 @@ class TargetStatistics(StatsDiagram,TargetDiagram):
             vmin=self._cmin,vmax=self._cmax,marker=marker,s=s,*opts,**keys)
         self._lpos.append((sig*E,E0))
         rmax=max(abs(array(self.ax.axis('scaled'))).max(),1.5)
+        self.ax.plot((0,0),(-rmax,rmax),'k-')
+        self.ax.plot((rmax,-rmax),(0,0),'k-')
         self.ax.axis(xmin=-rmax,xmax=rmax,ymax=rmax,ymin=-rmax)
         return mpl
 
