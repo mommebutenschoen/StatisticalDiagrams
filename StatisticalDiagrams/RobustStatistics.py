@@ -387,15 +387,16 @@ def MID(data):
 
 def QnExplicit(data,c=2.2219):
 
-   """Robust Scale measure::
+   """Robust scale measure::
 
-      Qn = c*dn*{|xi-xj|;i<j}_(k), i.e.
+      Qn = c*dn*{|xi-xj|;i<j}_(k)
 
    the kth order statistic of the ``( n over 2 )`` interpoint distances
    ``k=(n/2+1 over 2)``.
    In this version the mathematical definition was directly translated
    into code. This is highly inefficient (time and memory) and should only
    be used for checks.
+   
    See:
 
       Rousseeuw, P. J. & Croux
@@ -444,29 +445,32 @@ def QnExplicit(data,c=2.2219):
 
 def Qn(data):
 
-    """ Robust Scale measure::
+    """Robust scale measure::
 
        Qn = c*dn*{|xi-xj|;i<j}_(k)
-       
-    i.e. the kth order statistic of the ( n over 2 ) interpoint distances.
-    k=(n/2+1 over 2)
-    Optimised Version.
-    See:
-    Rousseeuw, P. J. & Croux
-    C. Alternatives to the Median Absolute Deviation
-    Journal of the American Statistical Association
-    1993, 88, 1273-1283
-    Croux, C. & Rousseeuw, P. J.
-    Time-efficient algorithms for two highly robust estimators of scale
-    Computational Statistics
-    1992, 1
 
-   Args:
-      data (float array-like): input data
-      c (float): scaling multiplyer (see background paper)
-   Returns:
-      Qn (float).
-   """
+    the kth order statistic of the ``( n over 2 )`` interpoint distances
+    ``k=(n/2+1 over 2)``.
+    Optimised version.
+
+    See:
+
+       Rousseeuw, P. J. & Croux
+       C. Alternatives to the Median Absolute Deviation
+       Journal of the American Statistical Association
+       1993, 88, 1273-1283
+       Croux, C. & Rousseeuw, P. J.
+       Time-efficient algorithms for two highly robust estimators of scale
+       Computational Statistics
+       1992, 1
+
+    Args:
+       data (float array-like): input data
+       c (float): scaling multiplyer (see background paper)
+
+    Returns:
+       Qn (float).
+    """
 
     y=data.flatten()
     if y.shape[0]<2:
