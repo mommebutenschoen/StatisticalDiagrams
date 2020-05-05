@@ -396,7 +396,7 @@ def QnExplicit(data,c=2.2219):
    In this version the mathematical definition was directly translated
    into code. This is highly inefficient (time and memory) and should only
    be used for checks.
-   
+
    See:
 
       Rousseeuw, P. J. & Croux
@@ -411,6 +411,7 @@ def QnExplicit(data,c=2.2219):
    Args:
       data (float array-like): input data
       c (float): scaling multiplyer (see background paper)
+      
    Returns:
       Qn (float).
    """
