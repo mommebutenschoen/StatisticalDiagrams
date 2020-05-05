@@ -447,6 +447,7 @@ def Qn(data):
     """ Robust Scale measure::
 
        Qn = c*dn*{|xi-xj|;i<j}_(k)
+       
     i.e. the kth order statistic of the ( n over 2 ) interpoint distances.
     k=(n/2+1 over 2)
     Optimised Version.
